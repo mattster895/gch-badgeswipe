@@ -113,11 +113,11 @@ public void SwipeAgent(System.ComponentModel.BackgroundWorker worker, System.Com
                     }
                 }
                 // If new workplace is unique
-                if (!processComplete && newWorkplace.workplace_unique)
+                if (!processComplete && newWorkplace.workplace_unique && newWorkplace.active_operator != 0)
                 {
                     // log out current worker
                     change_login_status(connection, newWorkplace.active_operator, false);
-                    MakeFrame(false, newWorkplace.active_operator, newWorkplace.workplace_name, newWorkplace.sibling_workplace_name);
+                    MakeFrame(false, newWorkplace.active_operator, newWorkplace.workplace_name, newWorkplace.sibling_workplace_name); 
                 }
                 // Log into new workplace
                 if(!processComplete)
@@ -181,7 +181,7 @@ public void write_frame(string frame)
     try
     {
         StreamWriter sw = new StreamWriter("log.txt", true);
-        sw.WriteLine("("+DateTime.Now.ToString("G")+"):\t" + frame);
+        sw.WriteLine("("+DateTime.Now.ToString("s")+"):\t" + frame);
         sw.Close();
     }
     catch(Exception e)
