@@ -1,0 +1,8 @@
+C:\Users\mfennell\documents\visual studio 2017\Projects\BadgeSwipeApp\BadgeSwipeApp\bin\Debug\BadgeSwipeApp.exe.config
+C:\Users\mfennell\documents\visual studio 2017\Projects\BadgeSwipeApp\BadgeSwipeApp\bin\Debug\BadgeSwipeApp.exe
+C:\Users\mfennell\documents\visual studio 2017\Projects\BadgeSwipeApp\BadgeSwipeApp\bin\Debug\BadgeSwipeApp.pdb
+C:\Users\mfennell\documents\visual studio 2017\Projects\BadgeSwipeApp\BadgeSwipeApp\bin\Debug\TableDependency.dll
+C:\Users\mfennell\documents\visual studio 2017\Projects\BadgeSwipeApp\BadgeSwipeApp\bin\Debug\TableDependency.SqlClient.dll
+C:\Users\mfennell\documents\visual studio 2017\Projects\BadgeSwipeApp\BadgeSwipeApp\obj\Debug\BadgeSwipeApp.csprojResolveAssemblyReference.cache
+C:\Users\mfennell\documents\visual studio 2017\Projects\BadgeSwipeApp\BadgeSwipeApp\obj\Debug\BadgeSwipeApp.exe
+C:\Users\mfennell\documents\visual studio 2017\Projects\BadgeSwipeApp\BadgeSwipeApp\obj\Debug\BadgeSwipeApp.pdb
