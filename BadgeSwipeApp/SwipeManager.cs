@@ -92,6 +92,8 @@ public void SwipeAgent(System.ComponentModel.BackgroundWorker worker, System.Com
                     command.ExecuteNonQuery();
                 }
             }
+            // Check if Workplace exists
+            // If not, bad scan, dump it.
 
             // What are we doing? Logging in or logging out?
 
@@ -163,7 +165,7 @@ public void MakeFrame(bool status, int worker_id, string workplace_name, string 
         }
     }
     //Console.WriteLine(Frame); 
-    //send_frame(Frame); // Disabled for testing
+    send_frame(Frame); // Disabled for testing
     write_frame(Frame); 
 }
 
