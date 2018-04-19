@@ -97,42 +97,59 @@ public void SwipeAgent(System.ComponentModel.BackgroundWorker worker, System.Com
 
             // What are we doing? Logging in or logging out?
 
-            if(swipeWorker.worker_id!=0)
+
+            // If worker exists
+            if (swipeWorker.worker_id != 0)
             {
                 // Logout of old workplace if necessary
                 if (swipeWorker.login_status)
                 {
-                    if(oldWorkplace.workplace_id == newWorkplace.workplace_id||oldWorkplace.workplace_id == newWorkplace.sibling_workplace)
+                    if (oldWorkplace.workplace_exclusive)
                     {
                         change_login_status(connection, swipeWorker.worker_id, false);
                         MakeFrame(false, swipeWorker.worker_id, oldWorkplace.workplace_name, oldWorkplace.sibling_workplace_name);
+                        if(oldWorkplace.workplace_id == newWorkplace.workplace_id)
+                        {
+                            processComplete = true;
+                        }
+                    }
+                    else if (newWorkplace.active_operator == swipeWorker.worker_id)
+                    {
+                        change_workplace_worker(connection,newWorkplace.workplace_id,newWorkplace.sibling_workplace,0,swipeWorker.worker_id);
+                        MakeFrame(false, swipeWorker.worker_id, newWorkplace.workplace_name, newWorkplace.sibling_workplace_name);
+                        
+                        // If worker is not logged in anywhere else, set login to FALSE
+                        if(!CheckForWorkerLoggedIn(connection, swipeWorker.worker_id))
+                        {
+                            change_login_status(connection, swipeWorker.worker_id, false);
+                        }
                         processComplete = true;
                     }
-                    if(!processComplete &&(newWorkplace.workplace_exclusive || oldWorkplace.workplace_exclusive))
+                }
+
+                
+                if (!processComplete)
+                {
+                    if(newWorkplace.workplace_unique && !CheckNull(connection,newWorkplace.workplace_id))
                     {
-                        change_login_status(connection, swipeWorker.worker_id, false);
-                        MakeFrame(false, swipeWorker.worker_id, oldWorkplace.workplace_name, oldWorkplace.sibling_workplace_name);
+                        // log out current worker
+                        change_workplace_worker(connection, newWorkplace.workplace_id, newWorkplace.sibling_workplace, swipeWorker.worker_id, newWorkplace.active_operator);
+                        MakeFrame(false, newWorkplace.active_operator, newWorkplace.workplace_name, newWorkplace.sibling_workplace_name);
+                        // If worker is not logged in anywhere else, set login to FALSE
+                        if (!CheckForWorkerLoggedIn(connection, newWorkplace.active_operator))
+                        {
+                            change_login_status(connection, newWorkplace.active_operator, false);
+                        }
                     }
-                }
-                // If new workplace is unique
-                if (!processComplete && newWorkplace.workplace_unique && newWorkplace.active_operator != 0)
-                {
-                    // log out current worker
-                    change_login_status(connection, newWorkplace.active_operator, false);
-                    MakeFrame(false, newWorkplace.active_operator, newWorkplace.workplace_name, newWorkplace.sibling_workplace_name); 
-                }
-                // Log into new workplace
-                if(!processComplete)
-                {
+                    if(newWorkplace.workplace_unique && CheckNull(connection, newWorkplace.workplace_id))
+                    {
+                        change_workplace_worker(connection, newWorkplace.workplace_id, newWorkplace.sibling_workplace, swipeWorker.worker_id, 0);
+                    }
+                    
                     change_login_status(connection, swipeWorker.worker_id, true);
                     MakeFrame(true, swipeWorker.worker_id, newWorkplace.workplace_name, newWorkplace.sibling_workplace_name);
                     change_worker_workplace(connection, swipeWorker.worker_id, newWorkplace.workplace_name, newWorkplace.sibling_workplace_name, newWorkplace.workplace_id, newWorkplace.sibling_workplace);
-                    if (newWorkplace.workplace_unique)
-                    {
-                        change_workplace_worker(connection, swipeWorker.worker_id, newWorkplace.active_operator);
-                    }
-                    processComplete = true;
-                }
+                }           
 
             }
         }
@@ -164,7 +181,6 @@ public void MakeFrame(bool status, int worker_id, string workplace_name, string 
             Frame += "," + second_workplace_name;
         }
     }
-    //Console.WriteLine(Frame); 
     send_frame(Frame); // Disabled for testing
     write_frame(Frame); 
 }
@@ -215,6 +231,7 @@ public void getEntry(QC.SqlConnection connection, SwipeData swipe)
             swipe.sent_id = reader.SafeGetInt(1);
         }
         reader.Close();
+        
     }
 }
 public void change_login_status(QC.SqlConnection connection, int worker_id, bool status)
@@ -255,6 +272,27 @@ public bool CheckExist(QC.SqlConnection connection, int id)
         return true;
     }
 }
+
+        public bool CheckNull(QC.SqlConnection connection, int id)
+        {
+            bool null_check = false;
+            using (var command = new QC.SqlCommand())
+            {
+                command.Connection = connection;
+                command.CommandType = DT.CommandType.Text;
+                command.CommandText = @"
+                SELECT active_operator
+                FROM Workplaces
+                WHERE workplace_id = " + id + ";";
+                QC.SqlDataReader reader = command.ExecuteReader();
+                while (reader.Read())
+                {
+                    null_check = reader.IsDBNull(0);
+                }
+                reader.Close();
+                return null_check;
+            }
+        }
 // -----------------------------------------------------------------------------------------------------------------------------------------------------
 // **WORKER FUNCTIONS**
 // These functions deal with the worker table in the database
@@ -322,7 +360,7 @@ public void FillWorker(QC.SqlConnection connection, Workers worker)
 // **WORKPLACE FUNCTIONS**
 // These functions deal with the workplace table in the database
 // -----------------------------------------------------------------------------------------------------------------------------------------------------
-public void change_workplace_worker(QC.SqlConnection connection, int worker_id, int old_worker_id)
+public void change_workplace_worker(QC.SqlConnection connection, int workplace_id, int sibling_id, int worker_id, int old_worker_id)
 {
     if (worker_id == 0)
     {
@@ -333,10 +371,25 @@ public void change_workplace_worker(QC.SqlConnection connection, int worker_id, 
             command.CommandText = @"
                 UPDATE Workplaces
                 SET active_operator = NULL " +
-                "" +
-                "WHERE active_operator = " + old_worker_id + ";";
+                "WHERE active_operator = " + old_worker_id + 
+                "AND (workplace_id = " + workplace_id + " OR workplace_id = " + sibling_id + ");";
             command.ExecuteNonQuery();
             //Console.WriteLine("Change Workplace - Executed");
+        }
+    }
+    else if(old_worker_id == 0)
+    {
+        using (var command = new QC.SqlCommand())
+        {
+            command.Connection = connection;
+            command.CommandType = DT.CommandType.Text;
+            command.CommandText = @"
+        UPDATE Workplaces
+        SET active_operator = " + worker_id +
+        "WHERE workplace_id = " + workplace_id + 
+        " OR workplace_id = " + sibling_id + ";";
+        command.ExecuteNonQuery();
+        //Console.WriteLine("Change Workplace - Executed");
         }
     }
     else
@@ -347,13 +400,36 @@ public void change_workplace_worker(QC.SqlConnection connection, int worker_id, 
             command.CommandType = DT.CommandType.Text;
             command.CommandText = @"
                 UPDATE Workplaces
-                SET active_operator = '" + worker_id +
-                        "'WHERE active_operator = '" + old_worker_id + "';";
-            command.ExecuteNonQuery();
+                SET active_operator = " + worker_id + 
+                "WHERE active_operator = " + old_worker_id +
+                "AND (workplace_id = " + workplace_id + " OR workplace_id = " + sibling_id + ");";
+                    command.ExecuteNonQuery();
             //Console.WriteLine("Change Workplace - Executed");
         }
     }
 }
+
+        public bool CheckForWorkerLoggedIn(QC.SqlConnection connection, int id)
+        {
+            using (var command = new QC.SqlCommand())
+            {
+                command.Connection = connection;
+                command.CommandType = DT.CommandType.Text;
+                command.CommandText = @"
+                SELECT * FROM Workplaces WHERE active_operator = " + id + ";";
+                QC.SqlDataReader reader = command.ExecuteReader();
+                if (reader.HasRows)
+                {
+                    reader.Close();
+                    return true;
+                }
+                else
+                {
+                    reader.Close();
+                    return false;
+                }
+            }
+        }
         
 public void FillWorkplace(QC.SqlConnection connection, Workplaces workplace)
 {
