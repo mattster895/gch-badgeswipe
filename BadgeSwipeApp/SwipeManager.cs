@@ -181,7 +181,7 @@ public void MakeFrame(bool status, int worker_id, string workplace_name, string 
             Frame += "," + second_workplace_name;
         }
     }
-    send_frame(Frame); // Disabled for testing
+    //send_frame(Frame); // Disabled for testing
     write_frame(Frame); 
 }
 
