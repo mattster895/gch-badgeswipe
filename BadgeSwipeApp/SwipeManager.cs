@@ -41,9 +41,9 @@ public void SwipeAgent(System.ComponentModel.BackgroundWorker worker, System.Com
             {
                 getEntry(connectionB, currentSwipe);
 
-                //Console.WriteLine("Writing Frame for Last Swipe");
-                //Console.WriteLine("ID - " + currentSwipe.sent_id);
-                //Console.WriteLine("Workplace - " + currentSwipe.sent_workplace);
+                Console.WriteLine("Writing Frame for Last Swipe");
+                Console.WriteLine("ID - " + currentSwipe.sent_id);
+                Console.WriteLine("Workplace - " + currentSwipe.sent_workplace);
                 //Console.WriteLine("Start Swipe - " + GlobalVar.StartValue);
                 //Console.WriteLine("SwipeNum - " + GlobalVar.SwipeNum);
 
@@ -346,12 +346,13 @@ public void FillWorker(QC.SqlConnection connection, Workers worker)
 
         while (reader.Read())
         {
-            worker.worker_clearance = reader.SafeGetInt(1);
-            worker.workplace_id = reader.SafeGetInt(2);
-            worker.workplace_name = reader.SafeGetString(3);
-            worker.secondary_workplace_id = reader.SafeGetInt(4);
-            worker.secondary_workplace_name = reader.SafeGetString(5);
-            worker.login_status = reader.GetBoolean(6);
+                    worker.worker_name = reader.SafeGetString(1);
+                    worker.worker_clearance = reader.SafeGetInt(2);
+                    worker.workplace_id = reader.SafeGetInt(3);
+                    worker.workplace_name = reader.SafeGetString(4);
+                    worker.secondary_workplace_id = reader.SafeGetInt(5);
+                    worker.secondary_workplace_name = reader.SafeGetString(6);
+                    worker.login_status = reader.GetBoolean(7);
         }
         reader.Close();
     }
