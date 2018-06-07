@@ -11,8 +11,8 @@ namespace BadgeSwipeApp
         public int workplace_id { get; set; }
         public string workplace_name { get; set; }
         public int active_operator { get; set; }
-        public int active_maintenance { get; set; }
-        public int active_engineer { get; set; }
+        public string active_operator_name { get; set; }
+        public int active_operator_clearance { get; set; }
         public string active_reference { get; set; }
         public int sibling_workplace { get; set; }
         public string sibling_workplace_name { get; set; }

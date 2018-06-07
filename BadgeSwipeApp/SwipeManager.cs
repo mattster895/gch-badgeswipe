@@ -447,8 +447,8 @@ public void FillWorkplace(QC.SqlConnection connection, Workplaces workplace)
         {
             workplace.workplace_name = reader.SafeGetString(1);
             workplace.active_operator = reader.SafeGetInt(2);
-            workplace.active_maintenance = reader.SafeGetInt(3);
-            workplace.active_engineer = reader.SafeGetInt(4);
+            workplace.active_operator_name = reader.SafeGetString(3);
+            workplace.active_operator_clearance = reader.SafeGetInt(4);
             workplace.active_reference = reader.SafeGetString(5);
             workplace.sibling_workplace = reader.SafeGetInt(6);
             workplace.sibling_workplace_name = reader.SafeGetString(7);
