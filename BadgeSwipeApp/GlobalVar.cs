@@ -8,18 +8,20 @@ namespace BadgeSwipeApp
 {
     public static class GlobalVar
     {
-        static int _startValue;
+        static int _StartSwipe;
         static int _SwipeNum;
+        static int _StartRef;
+        static int _RefNum;
 
-        public static int StartValue
+        public static int StartSwipe
         {
             get
             {
-                return _startValue;
+                return _StartSwipe;
             }
             set
             {
-                _startValue = value;
+                _StartSwipe = value;
             }
         }
 
@@ -35,6 +37,29 @@ namespace BadgeSwipeApp
             }
         }
         
+        public static int StartRef
+        {
+            get
+            {
+                return _StartRef;
+            }
+            set
+            {
+                _StartRef = value;
+            }
+        }
+
+        public static int RefNum
+        {
+            get
+            {
+                return _RefNum;
+            }
+            set
+            {
+                _RefNum = value;
+            }
+        }
 
     }
 }

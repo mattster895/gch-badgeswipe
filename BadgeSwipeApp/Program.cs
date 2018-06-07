@@ -11,8 +11,14 @@ namespace BadgeSwipeApp
             var worker1 = new BackgroundWorker { WorkerReportsProgress = true, WorkerSupportsCancellation = true };
             var worker2 = new BackgroundWorker { WorkerReportsProgress = true, WorkerSupportsCancellation = true };
 
-            GlobalVar.StartValue = 0;
+            GlobalVar.StartSwipe = 0;
             GlobalVar.SwipeNum = 0;
+
+            var worker3 = new BackgroundWorker { WorkerReportsProgress = true, WorkerSupportsCancellation = true };
+            var worker4 = new BackgroundWorker { WorkerReportsProgress = true, WorkerSupportsCancellation = true };
+
+            GlobalVar.StartRef = 0;
+            GlobalVar.RefNum = 0;
 
             Console.WriteLine("Badge Swipe Appliction is up and running");
 
@@ -25,17 +31,27 @@ namespace BadgeSwipeApp
             worker2.ProgressChanged += new ProgressChangedEventHandler(worker2_ProgressChanged);
             worker2.RunWorkerAsync();
 
+            Console.WriteLine("Reference Scan Application is up and running");
+            worker3.DoWork += new DoWorkEventHandler(worker3_DoWork);
+            worker3.ProgressChanged += new ProgressChangedEventHandler(worker3_ProgressChanged);
+            worker3.RunWorkerCompleted += new RunWorkerCompletedEventHandler(worker3_RunWorkerCompleted);
+            worker3.RunWorkerAsync();
+
+            worker4.DoWork += new DoWorkEventHandler(worker4_DoWork);
+            worker4.ProgressChanged += new ProgressChangedEventHandler(worker4_ProgressChanged);
+            worker4.RunWorkerAsync();
+
             Console.WriteLine("Press any key to stop workers");
             Console.ReadKey();
 
             worker1.CancelAsync();
             worker2.CancelAsync();
+            worker3.CancelAsync();
+            worker4.CancelAsync();
 
             Console.WriteLine("Press any key to quit");
             Console.ReadKey();
             
-            
-
         }
 
         private static void worker1_DoWork(object sender, DoWorkEventArgs e)
@@ -43,9 +59,7 @@ namespace BadgeSwipeApp
             // Get the BackgroundWorker that raised this event.
             BackgroundWorker worker = sender as BackgroundWorker;
             SwipeWatcher swipeWatcher = new SwipeWatcher();
-            swipeWatcher.DependencyWatch(worker, e);
-
-            
+            swipeWatcher.DependencyWatch(worker, e);   
         }
 
         private static void worker1_ProgressChanged(object sender, ProgressChangedEventArgs e)
@@ -85,12 +99,60 @@ namespace BadgeSwipeApp
         {
             BackgroundWorker worker = sender as BackgroundWorker;
 
-            GlobalVar.StartValue += 1;
+            GlobalVar.StartSwipe += 1;
             GlobalVar.SwipeNum =  GlobalVar.SwipeNum- 1;
-            //Console.WriteLine("CHANGED " + GlobalVar.StartValue);
+            //Console.WriteLine("CHANGED " + GlobalVar.StartSwipe);
             //Console.WriteLine("CHANGED " + GlobalVar.SwipeNum);
             
         }
+
+        private static void worker3_DoWork(object sender, DoWorkEventArgs e)
+        {
+            // Get the BackgroundWorker that raised this event.
+            BackgroundWorker worker = sender as BackgroundWorker;
+            RefWatcher refWatcher = new RefWatcher();
+            refWatcher.DependencyWatch(worker);
+        }
+
+        private static void worker3_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+            //Get the Background Worker that raised this event.
+            BackgroundWorker worker = sender as BackgroundWorker;
+        }
+
+        private static void worker3_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            if (e.Cancelled == true)
+            {
+                Console.WriteLine("Cancelled");
+            }
+            else if (e.Error != null)
+            {
+                Console.WriteLine("Error");
+            }
+            else
+            {
+                Console.WriteLine("Reference Watcher stopped");
+            }
+        }
+
+        private static void worker4_DoWork(object sender, DoWorkEventArgs e)
+        {
+            BackgroundWorker worker = sender as BackgroundWorker;
+
+            RefManager refManager = new RefManager();
+
+            refManager.RefAgent(worker, e);
+        }
+
+        private static void worker4_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+            BackgroundWorker worker = sender as BackgroundWorker;
+
+            GlobalVar.StartRef += 1;
+            GlobalVar.RefNum = GlobalVar.RefNum - 1;
+        }
+
 
 
     }

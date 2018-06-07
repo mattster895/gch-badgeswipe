@@ -45,9 +45,9 @@ namespace BadgeSwipeApp
             if (e.ChangeType == ChangeType.Insert)
             {
                 var changedEntity = e.Entity;
-                if (GlobalVar.StartValue == 0)
+                if (GlobalVar.StartSwipe == 0)
                 {
-                    GlobalVar.StartValue = changedEntity.entry_number;
+                    GlobalVar.StartSwipe = changedEntity.entry_number;
                 }
                 GlobalVar.SwipeNum += 1;
 

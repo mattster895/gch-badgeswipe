@@ -44,7 +44,7 @@ public void SwipeAgent(System.ComponentModel.BackgroundWorker worker, System.Com
                 Console.WriteLine("Writing Frame for Last Swipe");
                 Console.WriteLine("ID - " + currentSwipe.sent_id);
                 Console.WriteLine("Workplace - " + currentSwipe.sent_workplace);
-                //Console.WriteLine("Start Swipe - " + GlobalVar.StartValue);
+                //Console.WriteLine("Start Swipe - " + GlobalVar.StartSwipe);
                 //Console.WriteLine("SwipeNum - " + GlobalVar.SwipeNum);
 
                 SwipeProcess(connectionA, currentSwipe);
@@ -221,7 +221,7 @@ public void getEntry(QC.SqlConnection connection, SwipeData swipe)
         command.CommandText = @"
         SELECT sent_workplace, sent_id
         FROM SwipeData
-        WHERE entry_number = " + GlobalVar.StartValue + ";";
+        WHERE entry_number = " + GlobalVar.StartSwipe + ";";
 
         QC.SqlDataReader reader = command.ExecuteReader();
 
