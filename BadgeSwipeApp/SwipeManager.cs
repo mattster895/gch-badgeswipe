@@ -13,49 +13,50 @@ using System.IO;
 
 namespace BadgeSwipeApp
 {
-class SwipeManager
-{
-
-// -----------------------------------------------------------------------------------------------------------------------------------------------------
-// **SETUP**
-// These functions watch for swipes, and manage the steps that should be taken when a swipe happens
-// -----------------------------------------------------------------------------------------------------------------------------------------------------
-public void SwipeAgent(System.ComponentModel.BackgroundWorker worker, System.ComponentModel.DoWorkEventArgs e)
-{
-    SwipeData currentSwipe = new SwipeData();
-    using (var connectionA = new QC.SqlConnection(
-    "Server = 192.168.176.133; " +
-    "Database=Badge_Swipe_MainDB;" +
-    "Trusted_Connection=yes;"))
-    using (var connectionB = new QC.SqlConnection(
-    "Server = 192.168.176.133; " +
-    "Database=Badge_Swipe_EntryDB;" +
-    "Trusted_Connection=yes;"))
+    class SwipeManager
     {
-        connectionA.Open();
-        connectionB.Open();
-        Console.WriteLine("Go");
-        while (!worker.CancellationPending)
+
+        // -----------------------------------------------------------------------------------------------------------------------------------------------------
+        // **SETUP**
+        // These functions watch for swipes, and manage the steps that should be taken when a swipe happens
+        // -----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void SwipeAgent(System.ComponentModel.BackgroundWorker worker, System.ComponentModel.DoWorkEventArgs e)
         {
-            while(GlobalVar.SwipeNum>0)
+            SwipeData currentSwipe = new SwipeData();
+            using (var connectionA = new QC.SqlConnection(
+            "Server = 192.168.176.133; " +
+            "Database=Badge_Swipe_MainDB;" +
+            "Trusted_Connection=yes;"))
+                using (var connectionB = new QC.SqlConnection(
+                "Server = 192.168.176.133; " +
+                "Database=Badge_Swipe_EntryDB;" +
+                "Trusted_Connection=yes;"))
             {
-                getEntry(connectionB, currentSwipe);
+            connectionA.Open();
+            connectionB.Open();
+            Console.WriteLine("Go");
+            while (!worker.CancellationPending)
+            {
+                while(GlobalVar.SwipeNum>0)
+                {
+                    getEntry(connectionB, currentSwipe);
 
-                Console.WriteLine("Writing Frame for Last Swipe");
-                Console.WriteLine("ID - " + currentSwipe.sent_id);
-                Console.WriteLine("Workplace - " + currentSwipe.sent_workplace);
-                //Console.WriteLine("Start Swipe - " + GlobalVar.StartSwipe);
-                //Console.WriteLine("SwipeNum - " + GlobalVar.SwipeNum);
+                    Console.WriteLine("Writing Frame for Last Swipe");
+                    Console.WriteLine("ID - " + currentSwipe.sent_id);
+                    Console.WriteLine("Workplace - " + currentSwipe.sent_workplace);
+                    //Console.WriteLine("Start Swipe - " + GlobalVar.StartSwipe);
+                    //Console.WriteLine("SwipeNum - " + GlobalVar.SwipeNum);
 
-                SwipeProcess(connectionA, currentSwipe);
-                worker.ReportProgress(0);
-                Thread.Sleep(100);
+                    SwipeProcess(connectionA, currentSwipe);
+                    worker.ReportProgress(0);
+                    Thread.Sleep(100);
+                }
+            }                                    
+            connectionA.Close();
+            connectionB.Close();
             }
-        }                                    
-        connectionA.Close();
-        connectionB.Close();
-    }
-}
+        }
 
         public void SwipeProcess(QC.SqlConnection connection, SwipeData swipe)
         {
@@ -155,123 +156,125 @@ public void SwipeAgent(System.ComponentModel.BackgroundWorker worker, System.Com
         }
 
 
-// -----------------------------------------------------------------------------------------------------------------------------------------------------
-// **FRAME**
-// These functions generate and/or send the Sisteplant Captor Frames
-// -----------------------------------------------------------------------------------------------------------------------------------------------------
+        // -----------------------------------------------------------------------------------------------------------------------------------------------------
+        // **FRAME**
+        // These functions generate and/or send the Sisteplant Captor Frames
+        // -----------------------------------------------------------------------------------------------------------------------------------------------------
 
-public void MakeFrame(bool status, int worker_id, string workplace_name, string second_workplace_name)
-{
-    string Frame = "";
-    // send in frame (single/double)
-    if (status)
-    {
-        Frame = "INPW," + worker_id + "," + workplace_name.Trim();
-        if (second_workplace_name != string.Empty && second_workplace_name != "")
+        public void MakeFrame(bool status, int worker_id, string workplace_name, string second_workplace_name)
         {
-            Frame += "," + second_workplace_name;
+            string Frame = "";
+            // send in frame (single/double)
+            if (status)
+            {
+                Frame = "INPW," + worker_id + "," + workplace_name.Trim();
+                if (second_workplace_name != string.Empty && second_workplace_name != "")
+                {
+                    Frame += "," + second_workplace_name;
+                }
+            }
+            // send out frame (single/double)
+            if (!status)
+            {
+                Frame = "OUTW," + worker_id + "," + workplace_name.Trim();
+                if (second_workplace_name != string.Empty && second_workplace_name != "")
+                {
+                    Frame += "," + second_workplace_name;
+                }
+            }
+            //send_frame(Frame); // Disabled for testing
+            write_frame(Frame); 
         }
-    }
-    // send out frame (single/double)
-    if (!status)
-    {
-        Frame = "OUTW," + worker_id + "," + workplace_name.Trim();
-        if (second_workplace_name != string.Empty && second_workplace_name != "")
+
+        public void send_frame(string frame)
         {
-            Frame += "," + second_workplace_name;
+            Socket sock = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+            IPAddress captorAddress = IPAddress.Parse("192.168.176.134");
+            IPEndPoint endPoint = new IPEndPoint(captorAddress, 1038);
+            byte[] send_buffer = Encoding.UTF8.GetBytes(frame);
+            sock.SendTo(send_buffer, endPoint);            
         }
-    }
-    //send_frame(Frame); // Disabled for testing
-    write_frame(Frame); 
-}
 
-public void send_frame(string frame)
-{
-    Socket sock = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-    IPAddress captorAddress = IPAddress.Parse("192.168.176.134");
-    IPEndPoint endPoint = new IPEndPoint(captorAddress, 1038);
-    byte[] send_buffer = Encoding.UTF8.GetBytes(frame);
-    sock.SendTo(send_buffer, endPoint);            
-}
-
-public void write_frame(string frame)
-{
-    try
-    {
-        StreamWriter sw = new StreamWriter("log.txt", true);
-        sw.WriteLine("("+DateTime.Now.ToString("s")+"):\t" + frame);
-        sw.Close();
-    }
-    catch(Exception e)
-    {
-        Console.WriteLine("Exception: " + e.Message);
-    }
-}
-
-// -----------------------------------------------------------------------------------------------------------------------------------------------------
-// **UTILITY**
-// These functions are more all-purpose database manipulators
-// -----------------------------------------------------------------------------------------------------------------------------------------------------
-public void getEntry(QC.SqlConnection connection, SwipeData swipe)
-{
-    using (var command = new QC.SqlCommand())
-    {
-        command.Connection = connection;
-        command.CommandType = DT.CommandType.Text;
-        command.CommandText = @"
-        SELECT sent_workplace, sent_id
-        FROM SwipeData
-        WHERE entry_number = " + GlobalVar.StartSwipe + ";";
-
-        QC.SqlDataReader reader = command.ExecuteReader();
-
-        while (reader.Read())
+        public void write_frame(string frame)
         {
-            swipe.sent_workplace = reader.SafeGetInt(0);
-            swipe.sent_id = reader.SafeGetInt(1);
+            try
+            {
+                StreamWriter sw = new StreamWriter("Swipelog.txt", true);
+                sw.WriteLine("("+DateTime.Now.ToString("s")+"):\t" + frame);
+                sw.Close();
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine("Exception: " + e.Message);
+            }
         }
-        reader.Close();
+
+        // -----------------------------------------------------------------------------------------------------------------------------------------------------
+        // **UTILITY**
+        // These functions are more all-purpose database manipulators
+        // -----------------------------------------------------------------------------------------------------------------------------------------------------
+        public void getEntry(QC.SqlConnection connection, SwipeData swipe)
+        {
+            using (var command = new QC.SqlCommand())
+            {
+                command.Connection = connection;
+                command.CommandType = DT.CommandType.Text;
+                command.CommandText = @"
+                SELECT sent_workplace, sent_id
+                FROM SwipeData
+                WHERE entry_number = " + GlobalVar.StartSwipe + ";";
+
+                QC.SqlDataReader reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    swipe.sent_workplace = reader.SafeGetInt(0);
+                    swipe.sent_id = reader.SafeGetInt(1);
+                }
+                reader.Close();
         
-    }
-}
-public void change_login_status(QC.SqlConnection connection, int worker_id, bool status)
-{
-    // CHANGE IN DATABASE 
-    using (var command = new QC.SqlCommand())
-    {
-        command.Connection = connection;
-        command.CommandType = DT.CommandType.Text;
-        command.CommandText = @"
-        UPDATE Workers 
-        SET login_status = '" + status + "'" +
-        "WHERE worker_id = " + worker_id + ";";
-        command.ExecuteNonQuery();
-        //Console.WriteLine("Change Log Status - Executed");
-    }
-}
-public bool CheckExist(QC.SqlConnection connection, int id)
-{
-    int exist_id = 0;
-    using (var command = new QC.SqlCommand())
-    {
-        command.Connection = connection;
-        command.CommandType = DT.CommandType.Text;
-        command.CommandText = @"
-        SELECT * 
-        FROM Workers
-        WHERE worker_id = " + id + ";";
-        QC.SqlDataReader reader = command.ExecuteReader();
-        while (reader.Read())
-        {
-            exist_id = reader.SafeGetInt(0);
+            }
         }
-        reader.Close();
-        if (exist_id == 0)
-        return false;
-        else
-        return true;
-    }
-}
+
+        public void change_login_status(QC.SqlConnection connection, int worker_id, bool status)
+        {
+            // CHANGE IN DATABASE 
+            using (var command = new QC.SqlCommand())
+            {
+                command.Connection = connection;
+                command.CommandType = DT.CommandType.Text;
+                command.CommandText = @"
+                UPDATE Workers 
+                SET login_status = '" + status + "'" +
+                "WHERE worker_id = " + worker_id + ";";
+                command.ExecuteNonQuery();
+                //Console.WriteLine("Change Log Status - Executed");
+            }
+        }
+
+        public bool CheckExist(QC.SqlConnection connection, int id)
+        {
+            int exist_id = 0;
+            using (var command = new QC.SqlCommand())
+            {
+                command.Connection = connection;
+                command.CommandType = DT.CommandType.Text;
+                command.CommandText = @"
+                SELECT * 
+                FROM Workers
+                WHERE worker_id = " + id + ";";
+                QC.SqlDataReader reader = command.ExecuteReader();
+                while (reader.Read())
+                {
+                    exist_id = reader.SafeGetInt(0);
+                }
+                reader.Close();
+                if (exist_id == 0)
+                return false;
+                else
+                return true;
+            }
+        }
 
         public bool CheckNull(QC.SqlConnection connection, int id)
         {
@@ -293,122 +296,122 @@ public bool CheckExist(QC.SqlConnection connection, int id)
                 return null_check;
             }
         }
-// -----------------------------------------------------------------------------------------------------------------------------------------------------
-// **WORKER FUNCTIONS**
-// These functions deal with the worker table in the database
-// -----------------------------------------------------------------------------------------------------------------------------------------------------
-public void change_worker_workplace(QC.SqlConnection connection, int worker_id, string workplace_name, string second_workplace_name, int workplace_id, int secondary_workplace_id)
-{
-    using (var command = new QC.SqlCommand())
-    {
-        if (second_workplace_name == string.Empty)
+        // -----------------------------------------------------------------------------------------------------------------------------------------------------
+        // **WORKER FUNCTIONS**
+        // These functions deal with the worker table in the database
+        // -----------------------------------------------------------------------------------------------------------------------------------------------------
+        public void change_worker_workplace(QC.SqlConnection connection, int worker_id, string workplace_name, string second_workplace_name, int workplace_id, int secondary_workplace_id)
         {
-            command.Connection = connection;
-            command.CommandType = DT.CommandType.Text;
-            command.CommandText = @"
-            UPDATE Workers 
-            SET workplace_name = '" + workplace_name +
-                "', secondary_workplace_name = NULL"  +  
-                ", workplace_id = " + workplace_id +
-                ", secondary_workplace_id = NULL"  + 
-                " " +
-                "WHERE worker_id = " + worker_id + ";";
-            command.ExecuteNonQuery();
-            //Console.WriteLine("Change Worker - Executed");
-        }
-        else
-        {
-            command.Connection = connection;
-            command.CommandType = DT.CommandType.Text;
-            command.CommandText = @"
-            UPDATE Workers 
-            SET workplace_name = '" + workplace_name +
-                "', secondary_workplace_name = '" + second_workplace_name +
-                "', workplace_id = " + workplace_id +
-                ", secondary_workplace_id = " + secondary_workplace_id +
-                "WHERE worker_id = " + worker_id + ";";
-            command.ExecuteNonQuery();
-            //Console.WriteLine("Change Worker - Executed");
-        }           
-    }
-}
-public void FillWorker(QC.SqlConnection connection, Workers worker)
-{
-    using (var command = new QC.SqlCommand())
-    {
-        command.Connection = connection;
-        command.CommandType = DT.CommandType.Text;
-        command.CommandText = @"
-        SELECT * 
-        FROM Workers
-        WHERE worker_id = " + worker.worker_id + ";";
-        QC.SqlDataReader reader = command.ExecuteReader();
-
-        while (reader.Read())
-        {
-                    worker.worker_name = reader.SafeGetString(1);
-                    worker.worker_clearance = reader.SafeGetInt(2);
-                    worker.workplace_id = reader.SafeGetInt(3);
-                    worker.workplace_name = reader.SafeGetString(4);
-                    worker.secondary_workplace_id = reader.SafeGetInt(5);
-                    worker.secondary_workplace_name = reader.SafeGetString(6);
-                    worker.login_status = reader.GetBoolean(7);
-        }
-        reader.Close();
-    }
-}
-// -----------------------------------------------------------------------------------------------------------------------------------------------------
-// **WORKPLACE FUNCTIONS**
-// These functions deal with the workplace table in the database
-// -----------------------------------------------------------------------------------------------------------------------------------------------------
-public void change_workplace_worker(QC.SqlConnection connection, int workplace_id, int sibling_id, int worker_id, int old_worker_id)
-{
-    if (worker_id == 0)
-    {
-        using (var command = new QC.SqlCommand())
-        {
-            command.Connection = connection;
-            command.CommandType = DT.CommandType.Text;
-            command.CommandText = @"
-                UPDATE Workplaces
-                SET active_operator = NULL " +
-                "WHERE active_operator = " + old_worker_id + 
-                "AND (workplace_id = " + workplace_id + " OR workplace_id = " + sibling_id + ");";
-            command.ExecuteNonQuery();
-            //Console.WriteLine("Change Workplace - Executed");
-        }
-    }
-    else if(old_worker_id == 0)
-    {
-        using (var command = new QC.SqlCommand())
-        {
-            command.Connection = connection;
-            command.CommandType = DT.CommandType.Text;
-            command.CommandText = @"
-        UPDATE Workplaces
-        SET active_operator = " + worker_id +
-        "WHERE workplace_id = " + workplace_id + 
-        " OR workplace_id = " + sibling_id + ";";
-        command.ExecuteNonQuery();
-        //Console.WriteLine("Change Workplace - Executed");
-        }
-    }
-    else
-    {
-        using (var command = new QC.SqlCommand())
-        {
-            command.Connection = connection;
-            command.CommandType = DT.CommandType.Text;
-            command.CommandText = @"
-                UPDATE Workplaces
-                SET active_operator = " + worker_id + 
-                "WHERE active_operator = " + old_worker_id +
-                "AND (workplace_id = " + workplace_id + " OR workplace_id = " + sibling_id + ");";
+            using (var command = new QC.SqlCommand())
+            {
+                if (second_workplace_name == string.Empty)
+                {
+                    command.Connection = connection;
+                    command.CommandType = DT.CommandType.Text;
+                    command.CommandText = @"
+                    UPDATE Workers 
+                    SET workplace_name = '" + workplace_name +
+                        "', secondary_workplace_name = NULL"  +  
+                        ", workplace_id = " + workplace_id +
+                        ", secondary_workplace_id = NULL"  + 
+                        " " +
+                        "WHERE worker_id = " + worker_id + ";";
                     command.ExecuteNonQuery();
-            //Console.WriteLine("Change Workplace - Executed");
+                    //Console.WriteLine("Change Worker - Executed");
+                }
+                else
+                {
+                    command.Connection = connection;
+                    command.CommandType = DT.CommandType.Text;
+                    command.CommandText = @"
+                    UPDATE Workers 
+                    SET workplace_name = '" + workplace_name +
+                        "', secondary_workplace_name = '" + second_workplace_name +
+                        "', workplace_id = " + workplace_id +
+                        ", secondary_workplace_id = " + secondary_workplace_id +
+                        "WHERE worker_id = " + worker_id + ";";
+                    command.ExecuteNonQuery();
+                    //Console.WriteLine("Change Worker - Executed");
+                }           
+            }
         }
-    }
-}
+        public void FillWorker(QC.SqlConnection connection, Workers worker)
+        {
+            using (var command = new QC.SqlCommand())
+            {
+                command.Connection = connection;
+                command.CommandType = DT.CommandType.Text;
+                command.CommandText = @"
+                SELECT * 
+                FROM Workers
+                WHERE worker_id = " + worker.worker_id + ";";
+                QC.SqlDataReader reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                            worker.worker_name = reader.SafeGetString(1);
+                            worker.worker_clearance = reader.SafeGetInt(2);
+                            worker.workplace_id = reader.SafeGetInt(3);
+                            worker.workplace_name = reader.SafeGetString(4);
+                            worker.secondary_workplace_id = reader.SafeGetInt(5);
+                            worker.secondary_workplace_name = reader.SafeGetString(6);
+                            worker.login_status = reader.GetBoolean(7);
+                }
+                reader.Close();
+            }
+        }
+        // -----------------------------------------------------------------------------------------------------------------------------------------------------
+        // **WORKPLACE FUNCTIONS**
+        // These functions deal with the workplace table in the database
+        // -----------------------------------------------------------------------------------------------------------------------------------------------------
+        public void change_workplace_worker(QC.SqlConnection connection, int workplace_id, int sibling_id, int worker_id, int old_worker_id)
+        {
+            if (worker_id == 0)
+            {
+                using (var command = new QC.SqlCommand())
+                {
+                    command.Connection = connection;
+                    command.CommandType = DT.CommandType.Text;
+                    command.CommandText = @"
+                        UPDATE Workplaces
+                        SET active_operator = NULL " +
+                        "WHERE active_operator = " + old_worker_id + 
+                        "AND (workplace_id = " + workplace_id + " OR workplace_id = " + sibling_id + ");";
+                    command.ExecuteNonQuery();
+                    //Console.WriteLine("Change Workplace - Executed");
+                }
+            }
+            else if(old_worker_id == 0)
+            {
+                using (var command = new QC.SqlCommand())
+                {
+                    command.Connection = connection;
+                    command.CommandType = DT.CommandType.Text;
+                    command.CommandText = @"
+                UPDATE Workplaces
+                SET active_operator = " + worker_id +
+                "WHERE workplace_id = " + workplace_id + 
+                " OR workplace_id = " + sibling_id + ";";
+                command.ExecuteNonQuery();
+                //Console.WriteLine("Change Workplace - Executed");
+                }
+            }
+            else
+            {
+                using (var command = new QC.SqlCommand())
+                {
+                    command.Connection = connection;
+                    command.CommandType = DT.CommandType.Text;
+                    command.CommandText = @"
+                        UPDATE Workplaces
+                        SET active_operator = " + worker_id + 
+                        "WHERE active_operator = " + old_worker_id +
+                        "AND (workplace_id = " + workplace_id + " OR workplace_id = " + sibling_id + ");";
+                            command.ExecuteNonQuery();
+                    //Console.WriteLine("Change Workplace - Executed");
+                }
+            }
+        }
 
         public bool CheckForWorkerLoggedIn(QC.SqlConnection connection, int id)
         {
@@ -432,31 +435,31 @@ public void change_workplace_worker(QC.SqlConnection connection, int workplace_i
             }
         }
         
-public void FillWorkplace(QC.SqlConnection connection, Workplaces workplace)
-{
-    using (var command = new QC.SqlCommand())
-    {
-        command.Connection = connection;
-        command.CommandType = DT.CommandType.Text;
-        command.CommandText = @"
-        SELECT * 
-        FROM Workplaces
-        WHERE workplace_id = " + workplace.workplace_id + ";";
-        QC.SqlDataReader reader = command.ExecuteReader();
-        while (reader.Read())
+        public void FillWorkplace(QC.SqlConnection connection, Workplaces workplace)
         {
-            workplace.workplace_name = reader.SafeGetString(1);
-            workplace.active_operator = reader.SafeGetInt(2);
-            workplace.active_operator_name = reader.SafeGetString(3);
-            workplace.active_operator_clearance = reader.SafeGetInt(4);
-            workplace.active_reference = reader.SafeGetString(5);
-            workplace.sibling_workplace = reader.SafeGetInt(6);
-            workplace.sibling_workplace_name = reader.SafeGetString(7);
-            workplace.workplace_unique = reader.GetBoolean(8);
-            workplace.workplace_exclusive = reader.GetBoolean(9);
+            using (var command = new QC.SqlCommand())
+            {
+                command.Connection = connection;
+                command.CommandType = DT.CommandType.Text;
+                command.CommandText = @"
+                SELECT * 
+                FROM Workplaces
+                WHERE workplace_id = " + workplace.workplace_id + ";";
+                QC.SqlDataReader reader = command.ExecuteReader();
+                while (reader.Read())
+                {
+                    workplace.workplace_name = reader.SafeGetString(1);
+                    workplace.active_operator = reader.SafeGetInt(2);
+                    workplace.active_operator_name = reader.SafeGetString(3);
+                    workplace.active_operator_clearance = reader.SafeGetInt(4);
+                    workplace.active_reference = reader.SafeGetString(5);
+                    workplace.sibling_workplace = reader.SafeGetInt(6);
+                    workplace.sibling_workplace_name = reader.SafeGetString(7);
+                    workplace.workplace_unique = reader.GetBoolean(8);
+                    workplace.workplace_exclusive = reader.GetBoolean(9);
+                }
+                reader.Close();
+            }
         }
-        reader.Close();
     }
-}
-}
 }

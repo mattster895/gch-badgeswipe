@@ -44,6 +44,8 @@ namespace BadgeSwipeApp
                         Console.WriteLine("Writing Frame for Last Ref");
                         Console.WriteLine("Ref - " + currentRef.sent_ref);
                         Console.WriteLine("Workplace - " + currentRef.sent_workplace);
+                        Console.WriteLine("Start Ref - " + GlobalVar.StartRef);
+                        Console.WriteLine("RefNum - " + GlobalVar.RefNum);
 
                         RefProcess(connectionA, currentRef);
                         worker.ReportProgress(0);
@@ -59,9 +61,9 @@ namespace BadgeSwipeApp
         {
             bool processComplete = false;
 
-            // Set up shells for database data
+            // Log out current reference
 
-            // Fill reference shell
+            // Log in new reference
 
             
 
