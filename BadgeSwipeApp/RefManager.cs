@@ -110,9 +110,10 @@ namespace BadgeSwipeApp
                     if(scanRef.reference_number != 0)
                     {
                         change_login_status(connection, scanRef, true);
-                        change_workplace_reference(connection, scanRef, scanWorkplace);
                         MakeFrame(true, scanRef, scanWorkplace);
                     }
+                    change_workplace_reference(connection, scanRef, scanWorkplace);
+
                 }
             }
 
@@ -146,7 +147,7 @@ namespace BadgeSwipeApp
                 // Headstock?
             }
 
-            //send_frame(Frame);
+            send_frame(Frame);
             write_frame(Frame);
                 
         }

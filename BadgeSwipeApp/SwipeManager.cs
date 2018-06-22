@@ -183,7 +183,7 @@ namespace BadgeSwipeApp
                     Frame += "," + second_workplace_name;
                 }
             }
-            //send_frame(Frame); // Disabled for testing
+            send_frame(Frame); // Disabled for testing
             write_frame(Frame); 
         }
 
