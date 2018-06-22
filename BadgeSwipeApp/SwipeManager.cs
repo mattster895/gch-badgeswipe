@@ -452,7 +452,7 @@ namespace BadgeSwipeApp
                     workplace.active_operator = reader.SafeGetInt(2);
                     workplace.active_operator_name = reader.SafeGetString(3);
                     workplace.active_operator_clearance = reader.SafeGetInt(4);
-                    workplace.active_reference = reader.SafeGetString(5);
+                    workplace.active_reference = reader.SafeGetInt(5);
                     workplace.sibling_workplace = reader.SafeGetInt(6);
                     workplace.sibling_workplace_name = reader.SafeGetString(7);
                     workplace.workplace_unique = reader.GetBoolean(8);

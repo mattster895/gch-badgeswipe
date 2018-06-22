@@ -52,6 +52,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RefData.cs" />
+    <Compile Include="References.cs" />
     <Compile Include="RefManager.cs" />
     <Compile Include="RefWatcher.cs" />
     <Compile Include="SQLReaderExtensions.cs" />

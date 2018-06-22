@@ -13,7 +13,7 @@ namespace BadgeSwipeApp
         public int active_operator { get; set; }
         public string active_operator_name { get; set; }
         public int active_operator_clearance { get; set; }
-        public string active_reference { get; set; }
+        public int active_reference { get; set; }
         public int sibling_workplace { get; set; }
         public string sibling_workplace_name { get; set; }
         public bool workplace_unique { get; set; }
