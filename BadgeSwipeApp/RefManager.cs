@@ -83,11 +83,11 @@ namespace BadgeSwipeApp
 
                 // Log out current reference
                 change_login_status(connection, oldRef, false);
-                MakeFrame(false, scannedRef.part_number, scannedRef.workplace_name);
+                MakeFrame(false, scannedRef);
                 
                 // Log in new reference
                 change_login_status(connection, scannedRef, true);
-                MakeFrame(true, scannedRef.part_number, scannedRef.workplace_name);
+                MakeFrame(true, scannedRef);
             }
 
 
@@ -100,14 +100,38 @@ namespace BadgeSwipeApp
         // These functions generate and/or send the Sisteplant Captor Frames
         // -----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void MakeFrame(bool status, string part_data, string workplace_name)
+        public void MakeFrame(bool status, References reference)
         {
+            //  Input Reference: INPM,Reference,Workplace,Headstock1 | Headstock2 |…..| HeadstockN
+            // Output Reference: OUTM,Reference,Workplace,Headstock1 | Headstock2 |…..| HeadstockN
 
+            string Frame = "";
+            // send in frame
+            if (status)
+            {
+                Frame = "INPM," + reference.part_number.Trim() + "," + reference.workplace_name.Trim();
+                
+                // Headstock?
+            }
+            if (!status)
+            {
+                Frame = "OUTM," + reference.part_number.Trim() + "," + reference.workplace_name.Trim();
+
+                // Headstock?
+            }
+
+            //send_frame(Frame);
+            write_frame(Frame);
+                
         }
 
         public void send_frame(string frame)
         {
-
+            Socket sock = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+            IPAddress captorAddress = IPAddress.Parse("192.168.176.134");
+            IPEndPoint endPoint = new IPEndPoint(captorAddress, 1038);
+            byte[] send_buffer = Encoding.UTF8.GetBytes(frame);
+            sock.SendTo(send_buffer, endPoint);
         }
         public void write_frame(string frame)
         {
