@@ -37,7 +37,7 @@ namespace BadgeSwipeApp
                 Console.WriteLine("Go");
                 while (!worker.CancellationPending)
                 {
-                    while (GlobalVar.SwipeNum > 0)
+                    while (GlobalVar.RefNum > 0)
                     {
                         getEntry(connectionB, currentRef);
 
@@ -59,35 +59,48 @@ namespace BadgeSwipeApp
 
         public void RefProcess(QC.SqlConnection connection, RefData reference)
         {
-            bool processComplete = false;
+            bool process_complete = false;
 
             // Save scanned reference details
-            References scannedRef = new References();
-            scannedRef.reference_number = reference.sent_ref;
+            References scanRef = new References();
+            scanRef.reference_number = reference.sent_ref;
 
             // Save workplace scan details
             Workplaces scanWorkplace = new Workplaces();
             scanWorkplace.workplace_id = reference.sent_workplace;
 
             // Fill reference and workplace shells
-            FillReference(connection, scannedRef);
+            FillReference(connection, scanRef);
             FillWorkplace(connection, scanWorkplace);
 
+            
             // If new scanned reference != current reference
-            if (scanWorkplace.active_reference != scannedRef.reference_number)
+            if (scanWorkplace.active_reference != scanRef.reference_number)
             {
                 //Save details of reference already in that workplace
                 References oldRef = new References();
                 oldRef.reference_number = scanWorkplace.active_reference;
                 FillReference(connection, oldRef);
 
-                // Log out current reference
-                change_login_status(connection, oldRef, false);
-                MakeFrame(false, scannedRef);
-                
-                // Log in new reference
-                change_login_status(connection, scannedRef, true);
-                MakeFrame(true, scannedRef);
+                if (scanRef.reference_number == 0)
+                {
+                    // Check for "Reaper Job"
+                        // Do nothing if Reaper Job exists
+                        process_complete = true;
+                    // Otherwise, continue as normal
+                }
+
+                if (!process_complete)
+                {
+                    // Log out current reference
+                    
+                    //change_login_status(connection, oldRef, false);
+                    //MakeFrame(false, scanRef);
+
+                    // Log in new reference
+                    change_login_status(connection, scanRef, true);
+                    MakeFrame(true, scanRef);
+                }
             }
 
 
@@ -102,7 +115,7 @@ namespace BadgeSwipeApp
 
         public void MakeFrame(bool status, References reference)
         {
-            //  Input Reference: INPM,Reference,Workplace,Headstock1 | Headstock2 |…..| HeadstockN
+            // Input Reference : INPM,Reference,Workplace,Headstock1 | Headstock2 |…..| HeadstockN
             // Output Reference: OUTM,Reference,Workplace,Headstock1 | Headstock2 |…..| HeadstockN
 
             string Frame = "";
@@ -133,6 +146,7 @@ namespace BadgeSwipeApp
             byte[] send_buffer = Encoding.UTF8.GetBytes(frame);
             sock.SendTo(send_buffer, endPoint);
         }
+
         public void write_frame(string frame)
         {
             try
@@ -146,6 +160,7 @@ namespace BadgeSwipeApp
                 Console.WriteLine("Exception: " + e.Message);
             }
         }
+
         // -----------------------------------------------------------------------------------------------------------------------------------------------------
         // **UTILITY**
         // These functions are more all-purpose database manipulators
@@ -181,7 +196,7 @@ namespace BadgeSwipeApp
                 command.Connection = connection;
                 command.CommandType = DT.CommandType.Text;
                 command.CommandText = @"
-                UPDATE References 
+                UPDATE Refs 
                 SET login_status = '" + status + "'" +
                 "WHERE reference_number = " + reference.reference_number + ";";
                 command.ExecuteNonQuery();
@@ -197,8 +212,8 @@ namespace BadgeSwipeApp
                 command.CommandType = DT.CommandType.Text;
                 command.CommandText = @"
                 SELECT *
-                FROM References
-                WHERE reference_id = " + reference.reference_number + ";";
+                FROM Refs
+                WHERE reference_number = " + reference.reference_number + ";";
                 QC.SqlDataReader reader = command.ExecuteReader();
                 while (reader.Read())
                 {
@@ -212,6 +227,15 @@ namespace BadgeSwipeApp
                 }
                 reader.Close();
             }
+
+            Console.WriteLine("Reference Number = " + reference.reference_number);
+            Console.WriteLine("Part Number = " + reference.part_number);
+            Console.WriteLine("Program Specification = " + reference.program_specification);
+            Console.WriteLine("Cycle Time = " + reference.cycle_time);
+            Console.WriteLine("Parts Produced = " + reference.parts_produced);
+            Console.WriteLine("Workplace ID = " + reference.workplace_id);
+            Console.WriteLine("Workplace Name = " + reference.workplace_name);
+            Console.WriteLine("Login Status = " + reference.login_status);
         }
 
         public void FillWorkplace(QC.SqlConnection connection, Workplaces workplace)

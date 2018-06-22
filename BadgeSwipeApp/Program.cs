@@ -111,7 +111,7 @@ namespace BadgeSwipeApp
             // Get the BackgroundWorker that raised this event.
             BackgroundWorker worker = sender as BackgroundWorker;
             RefWatcher refWatcher = new RefWatcher();
-            refWatcher.DependencyWatch(worker);
+            refWatcher.DependencyWatch(worker, e);
         }
 
         private static void worker3_ProgressChanged(object sender, ProgressChangedEventArgs e)
