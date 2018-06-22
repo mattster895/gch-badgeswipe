@@ -99,7 +99,7 @@ namespace BadgeSwipeApp
 
                     // Log in new reference
                     change_login_status(connection, scanRef, true);
-                    MakeFrame(true, scanRef);
+                    MakeFrame(true, scanRef, scanWorkplace);
                 }
             }
 
@@ -113,7 +113,7 @@ namespace BadgeSwipeApp
         // These functions generate and/or send the Sisteplant Captor Frames
         // -----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void MakeFrame(bool status, References reference)
+        public void MakeFrame(bool status, References scanref, Workplaces scanwork)
         {
             // Input Reference : INPM,Reference,Workplace,Headstock1 | Headstock2 |…..| HeadstockN
             // Output Reference: OUTM,Reference,Workplace,Headstock1 | Headstock2 |…..| HeadstockN
@@ -122,13 +122,13 @@ namespace BadgeSwipeApp
             // send in frame
             if (status)
             {
-                Frame = "INPM," + reference.part_number.Trim() + "," + reference.workplace_name.Trim();
+                Frame = "INPM," + scanref.part_number.Trim() + "," + scanwork.workplace_name.Trim();
                 
                 // Headstock?
             }
             if (!status)
             {
-                Frame = "OUTM," + reference.part_number.Trim() + "," + reference.workplace_name.Trim();
+                Frame = "OUTM," + scanref.part_number.Trim() + "," + scanwork.workplace_name.Trim();
 
                 // Headstock?
             }
