@@ -93,12 +93,15 @@ namespace BadgeSwipeApp
                 if (!process_complete)
                 {
                     // Log out current reference
-                    
-                    //change_login_status(connection, oldRef, false);
-                    //MakeFrame(false, scanRef);
+                    if (oldRef.reference_number != 0)
+                    {
+                        change_login_status(connection, oldRef, false);
+                        MakeFrame(false, scanRef, scanWorkplace);
+                    }
 
                     // Log in new reference
                     change_login_status(connection, scanRef, true);
+                    change_workplace_reference(connection, scanRef, scanWorkplace);
                     MakeFrame(true, scanRef, scanWorkplace);
                 }
             }
@@ -113,7 +116,7 @@ namespace BadgeSwipeApp
         // These functions generate and/or send the Sisteplant Captor Frames
         // -----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void MakeFrame(bool status, References scanref, Workplaces scanwork)
+        public void MakeFrame(bool status, References Ref, Workplaces Workplace)
         {
             // Input Reference : INPM,Reference,Workplace,Headstock1 | Headstock2 |…..| HeadstockN
             // Output Reference: OUTM,Reference,Workplace,Headstock1 | Headstock2 |…..| HeadstockN
@@ -122,13 +125,13 @@ namespace BadgeSwipeApp
             // send in frame
             if (status)
             {
-                Frame = "INPM," + scanref.part_number.Trim() + "," + scanwork.workplace_name.Trim();
+                Frame = "INPM," + Ref.part_number.Trim() + "," + Workplace.workplace_name.Trim();
                 
                 // Headstock?
             }
             if (!status)
             {
-                Frame = "OUTM," + scanref.part_number.Trim() + "," + scanwork.workplace_name.Trim();
+                Frame = "OUTM," + Ref.part_number.Trim() + "," + Workplace.workplace_name.Trim();
 
                 // Headstock?
             }
@@ -201,6 +204,20 @@ namespace BadgeSwipeApp
                 "WHERE reference_number = " + reference.reference_number + ";";
                 command.ExecuteNonQuery();
                 //Console.WriteLine("Change Log Status - Executed");
+            }
+        }
+
+        public void change_workplace_reference(QC.SqlConnection connection, References Ref, Workplaces Workplace)
+        {
+            using (var command = new QC.SqlCommand())
+            {
+                command.Connection = connection;
+                command.CommandType = DT.CommandType.Text;
+                command.CommandText = @"
+                UPDATE Workplaces
+                SET active_reference = " + Ref.reference_number +
+                "WHERE workplace_id = " + Workplace.workplace_id + ";";
+                command.ExecuteNonQuery();
             }
         }
 
