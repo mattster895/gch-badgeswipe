@@ -34,18 +34,19 @@ namespace BadgeSwipeApp
             {
                 connectionA.Open();
                 connectionB.Open();
-                Console.WriteLine("Go");
+                Console.WriteLine("Reference Scan App is up and running");
+                
                 while (!worker.CancellationPending)
                 {
                     while (GlobalVar.RefNum > 0)
                     {
                         getEntry(connectionB, currentRef);
 
-                        Console.WriteLine("Writing Frame for Last Ref");
-                        Console.WriteLine("Ref - " + currentRef.sent_ref);
-                        Console.WriteLine("Workplace - " + currentRef.sent_workplace);
-                        Console.WriteLine("Start Ref - " + GlobalVar.StartRef);
-                        Console.WriteLine("RefNum - " + GlobalVar.RefNum);
+                        //Console.WriteLine("Writing Frame for Last Ref");
+                        //Console.WriteLine("Ref - " + currentRef.sent_ref);
+                        //Console.WriteLine("Workplace - " + currentRef.sent_workplace);
+                        //Console.WriteLine("Start Ref - " + GlobalVar.StartRef);
+                        //Console.WriteLine("RefNum - " + GlobalVar.RefNum);
 
                         RefProcess(connectionA, currentRef);
                         worker.ReportProgress(0);
@@ -60,6 +61,7 @@ namespace BadgeSwipeApp
         public void RefProcess(QC.SqlConnection connection, RefData reference)
         {
             bool process_complete = false;
+            bool reaper = false;
 
             // Save scanned reference details
             References scanRef = new References();
@@ -85,8 +87,13 @@ namespace BadgeSwipeApp
                 if (scanRef.reference_number == 0)
                 {
                     // Check for "Reaper Job"
+                    if (reaper)
+                    {
                         // Do nothing if Reaper Job exists
                         process_complete = true;
+                    }
+                        
+                        
                     // Otherwise, continue as normal
                 }
 
@@ -96,13 +103,16 @@ namespace BadgeSwipeApp
                     if (oldRef.reference_number != 0)
                     {
                         change_login_status(connection, oldRef, false);
-                        MakeFrame(false, scanRef, scanWorkplace);
+                        MakeFrame(false, oldRef, scanWorkplace);
                     }
 
                     // Log in new reference
-                    change_login_status(connection, scanRef, true);
-                    change_workplace_reference(connection, scanRef, scanWorkplace);
-                    MakeFrame(true, scanRef, scanWorkplace);
+                    if(scanRef.reference_number != 0)
+                    {
+                        change_login_status(connection, scanRef, true);
+                        change_workplace_reference(connection, scanRef, scanWorkplace);
+                        MakeFrame(true, scanRef, scanWorkplace);
+                    }
                 }
             }
 
@@ -245,6 +255,9 @@ namespace BadgeSwipeApp
                 reader.Close();
             }
 
+            Console.WriteLine();
+            Console.WriteLine("DEBUG");
+            Console.WriteLine("----------------------");
             Console.WriteLine("Reference Number = " + reference.reference_number);
             Console.WriteLine("Part Number = " + reference.part_number);
             Console.WriteLine("Program Specification = " + reference.program_specification);
@@ -253,6 +266,7 @@ namespace BadgeSwipeApp
             Console.WriteLine("Workplace ID = " + reference.workplace_id);
             Console.WriteLine("Workplace Name = " + reference.workplace_name);
             Console.WriteLine("Login Status = " + reference.login_status);
+            
         }
 
         public void FillWorkplace(QC.SqlConnection connection, Workplaces workplace)

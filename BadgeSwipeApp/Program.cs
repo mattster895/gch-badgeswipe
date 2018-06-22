@@ -20,7 +20,7 @@ namespace BadgeSwipeApp
             GlobalVar.StartRef = 0;
             GlobalVar.RefNum = 0;
 
-            Console.WriteLine("Badge Swipe Appliction is up and running");
+            Console.WriteLine("Badge Swipe Appliction is starting");
 
             worker1.DoWork += new DoWorkEventHandler(worker1_DoWork);
             worker1.ProgressChanged += new ProgressChangedEventHandler(worker1_ProgressChanged);
@@ -31,7 +31,7 @@ namespace BadgeSwipeApp
             worker2.ProgressChanged += new ProgressChangedEventHandler(worker2_ProgressChanged);
             worker2.RunWorkerAsync();
 
-            Console.WriteLine("Reference Scan Application is up and running");
+            Console.WriteLine("Reference Scan Application is starting");
             worker3.DoWork += new DoWorkEventHandler(worker3_DoWork);
             worker3.ProgressChanged += new ProgressChangedEventHandler(worker3_ProgressChanged);
             worker3.RunWorkerCompleted += new RunWorkerCompletedEventHandler(worker3_RunWorkerCompleted);

@@ -35,8 +35,9 @@ namespace BadgeSwipeApp
             {
             connectionA.Open();
             connectionB.Open();
-            Console.WriteLine("Go");
-            while (!worker.CancellationPending)
+            Console.WriteLine("Badge Swipe App is up and running");
+                
+                while (!worker.CancellationPending)
             {
                 while(GlobalVar.SwipeNum>0)
                 {
