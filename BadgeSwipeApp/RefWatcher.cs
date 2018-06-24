@@ -19,7 +19,7 @@ namespace BadgeSwipeApp
             var connectionString = "Server = 192.168.176.133; " +
                                     "Database=Badge_Swipe_EntryDB;" +
                                     "Trusted_Connection=yes";
-            var tableDependency = new SqlTableDependency<RefData>(connectionString, "RefData");
+            var tableDependency = new SqlTableDependency<RefEntry>(connectionString, "RefData");
 
             using (tableDependency)
             {
@@ -38,7 +38,7 @@ namespace BadgeSwipeApp
 
         }
 
-        static void TableDependency_Changed(object sender, RecordChangedEventArgs<RefData> e)
+        static void TableDependency_Changed(object sender, RecordChangedEventArgs<RefEntry> e)
         {
 
             if (e.ChangeType == ChangeType.Insert)

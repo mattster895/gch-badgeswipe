@@ -23,64 +23,68 @@ namespace BadgeSwipeApp
 
         public void SwipeAgent(System.ComponentModel.BackgroundWorker worker, System.ComponentModel.DoWorkEventArgs e)
         {
-            SwipeData currentSwipe = new SwipeData();
-            using (var connectionA = new QC.SqlConnection(
+            SwipeEntry currentSwipe = new SwipeEntry();
+            using (var connectionMainDB = new QC.SqlConnection(
             "Server = 192.168.176.133; " +
             "Database=Badge_Swipe_MainDB;" +
             "Trusted_Connection=yes;"))
-                using (var connectionB = new QC.SqlConnection(
+                using (var connectionEntryDB = new QC.SqlConnection(
                 "Server = 192.168.176.133; " +
                 "Database=Badge_Swipe_EntryDB;" +
                 "Trusted_Connection=yes;"))
             {
-            connectionA.Open();
-            connectionB.Open();
+            connectionMainDB.Open();
+            connectionEntryDB.Open();
             Console.WriteLine("Badge Swipe App is up and running");
                 
                 while (!worker.CancellationPending)
             {
                 while(GlobalVar.SwipeNum>0)
                 {
-                    getEntry(connectionB, currentSwipe);
+                    getEntry(connectionEntryDB, currentSwipe);
 
-                    Console.WriteLine("Writing Frame for Last Swipe");
-                    Console.WriteLine("ID - " + currentSwipe.sent_id);
-                    Console.WriteLine("Workplace - " + currentSwipe.sent_workplace);
-                    //Console.WriteLine("Start Swipe - " + GlobalVar.StartSwipe);
-                    //Console.WriteLine("SwipeNum - " + GlobalVar.SwipeNum);
-
-                    SwipeProcess(connectionA, currentSwipe);
-                    worker.ReportProgress(0);
-                    Thread.Sleep(100);
+                        
+                        
+                        Console.WriteLine("Writing Frame for Last Swipe");
+                        Console.WriteLine("ID - " + currentSwipe.sent_id);
+                        Console.WriteLine("Workplace - " + currentSwipe.sent_workplace);
+                        Console.WriteLine("Timestamp - " + currentSwipe.timestamp);
+                        //Console.WriteLine("Start Swipe - " + GlobalVar.StartSwipe);
+                        //Console.WriteLine("SwipeNum - " + GlobalVar.SwipeNum);
+                        
+                        SwipeProcess(connectionMainDB, currentSwipe);
+                        worker.ReportProgress(0);
+                        Thread.Sleep(100);
                 }
             }                                    
-            connectionA.Close();
-            connectionB.Close();
+            connectionMainDB.Close();
+            connectionEntryDB.Close();
             }
         }
 
-        public void SwipeProcess(QC.SqlConnection connection, SwipeData swipe)
+        public void SwipeProcess(QC.SqlConnection connection, SwipeEntry swipe)
         {
             bool processComplete = false; 
 
-            // Set up "shells" for database data
+            // Save swiped ID details
             Workers swipeWorker = new Workers();
             swipeWorker.worker_id = swipe.sent_id;
 
+            // Save swiped workplace details
             Workplaces newWorkplace = new Workplaces();
             newWorkplace.workplace_id = swipe.sent_workplace;
 
-            Workplaces oldWorkplace = new Workplaces();
-
-            // Fill worker "shell"
+            // Fill ID and workplace shells
             FillWorker(connection, swipeWorker);
             FillWorkplace(connection, newWorkplace);
+
+            // Get details of ID's current workplace 
+            Workplaces oldWorkplace = new Workplaces();
             oldWorkplace.workplace_id = swipeWorker.workplace_id;
             FillWorkplace(connection, oldWorkplace);
 
-            // Check if ID exists
-            // If not, add to the workers database
-            if (!CheckExist(connection, swipeWorker.worker_id))
+            // Check if ID exists. If not, add to the workers database
+            if (!CheckExist(connection, swipeWorker))
             {
                 //Console.WriteLine("CREATE WORKER ID");
                 using (var command = new QC.SqlCommand())
@@ -88,17 +92,16 @@ namespace BadgeSwipeApp
                     command.Connection = connection;
                     command.CommandType = DT.CommandType.Text;
                     command.CommandText = @"
-            INSERT
-            INTO Workers (worker_id, worker_clearance, login_status)
-            VALUES (" + swipeWorker.worker_id + ", 1, 'FALSE');";
+                    INSERT
+                    INTO Workers (worker_id, worker_clearance, login_status)
+                    VALUES (" + swipeWorker.worker_id + ", 1, 'FALSE');";
                     command.ExecuteNonQuery();
                 }
             }
-            // Check if Workplace exists
-            // If not, bad scan, dump it.
-
+            // Check if Workplace exists. If not, bad scan, dump it.
+                // TO BE IMPLEMENTED
+            
             // What are we doing? Logging in or logging out?
-
 
             // If worker exists
             if (swipeWorker.worker_id != 0)
@@ -183,7 +186,7 @@ namespace BadgeSwipeApp
                     Frame += "," + second_workplace_name;
                 }
             }
-            send_frame(Frame); // Disabled for testing
+            //send_frame(Frame); // Disabled for testing
             write_frame(Frame); 
         }
 
@@ -214,14 +217,14 @@ namespace BadgeSwipeApp
         // **UTILITY**
         // These functions are more all-purpose database manipulators
         // -----------------------------------------------------------------------------------------------------------------------------------------------------
-        public void getEntry(QC.SqlConnection connection, SwipeData swipe)
+        public void getEntry(QC.SqlConnection connection, SwipeEntry swipe)
         {
             using (var command = new QC.SqlCommand())
             {
                 command.Connection = connection;
                 command.CommandType = DT.CommandType.Text;
                 command.CommandText = @"
-                SELECT sent_workplace, sent_id
+                SELECT sent_workplace, sent_id, timestamp
                 FROM SwipeData
                 WHERE entry_number = " + GlobalVar.StartSwipe + ";";
 
@@ -231,6 +234,7 @@ namespace BadgeSwipeApp
                 {
                     swipe.sent_workplace = reader.SafeGetInt(0);
                     swipe.sent_id = reader.SafeGetInt(1);
+                    swipe.timestamp = reader.GetDateTime(2);
                 }
                 reader.Close();
         
@@ -253,7 +257,7 @@ namespace BadgeSwipeApp
             }
         }
 
-        public bool CheckExist(QC.SqlConnection connection, int id)
+        public bool CheckExist(QC.SqlConnection connection, Workers worker)
         {
             int exist_id = 0;
             using (var command = new QC.SqlCommand())
@@ -263,7 +267,7 @@ namespace BadgeSwipeApp
                 command.CommandText = @"
                 SELECT * 
                 FROM Workers
-                WHERE worker_id = " + id + ";";
+                WHERE worker_id = " + worker.worker_id + ";";
                 QC.SqlDataReader reader = command.ExecuteReader();
                 while (reader.Read())
                 {

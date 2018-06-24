@@ -22,54 +22,56 @@ namespace BadgeSwipeApp
 
         public void RefAgent(System.ComponentModel.BackgroundWorker worker, System.ComponentModel.DoWorkEventArgs e)
         {
-            RefData currentRef = new RefData();
-            using (var connectionA = new QC.SqlConnection(
+            RefEntry currentRef = new RefEntry();
+            using (var connectionMainDB = new QC.SqlConnection(
                 "Server = 192.168.176.133; " +
                 "Database=Badge_Swipe_MainDB;" +
                 "Trusted_Connection=yes;"))
-                using (var connectionB = new QC.SqlConnection(
+                using (var connectionEntryDB = new QC.SqlConnection(
                     "Server = 192.168.176.133; " +
                     "Database=Badge_Swipe_EntryDB;" +
                     "Trusted_Connection=yes;"))
             {
-                connectionA.Open();
-                connectionB.Open();
+                connectionMainDB.Open();
+                connectionEntryDB.Open();
                 Console.WriteLine("Reference Scan App is up and running");
                 
                 while (!worker.CancellationPending)
                 {
                     while (GlobalVar.RefNum > 0)
                     {
-                        getEntry(connectionB, currentRef);
+                        getEntry(connectionEntryDB, currentRef);
 
-                        //Console.WriteLine("Writing Frame for Last Ref");
-                        //Console.WriteLine("Ref - " + currentRef.sent_ref);
-                        //Console.WriteLine("Workplace - " + currentRef.sent_workplace);
+                        Console.WriteLine("Writing Frame for Last Ref");
+                        Console.WriteLine("Ref - " + currentRef.sent_ref);
+                        Console.WriteLine("Workplace - " + currentRef.sent_workplace);
+                        Console.WriteLine("Timestamp - " + currentRef.timestamp);
+                
                         //Console.WriteLine("Start Ref - " + GlobalVar.StartRef);
                         //Console.WriteLine("RefNum - " + GlobalVar.RefNum);
 
-                        RefProcess(connectionA, currentRef);
+                        RefProcess(connectionMainDB, currentRef);
                         worker.ReportProgress(0);
                         Thread.Sleep(100);
                     }
                 }
-                connectionA.Close();
-                connectionB.Close();
+                connectionMainDB.Close();
+                connectionEntryDB.Close();
             }
         }
 
-        public void RefProcess(QC.SqlConnection connection, RefData reference)
+        public void RefProcess(QC.SqlConnection connection, RefEntry refEntry)
         {
             bool process_complete = false;
             bool reaper = false;
 
             // Save scanned reference details
-            References scanRef = new References();
-            scanRef.reference_number = reference.sent_ref;
+            Refs scanRef = new Refs();
+            scanRef.reference_number = refEntry.sent_ref;
 
             // Save workplace scan details
             Workplaces scanWorkplace = new Workplaces();
-            scanWorkplace.workplace_id = reference.sent_workplace;
+            scanWorkplace.workplace_id = refEntry.sent_workplace;
 
             // Fill reference and workplace shells
             FillReference(connection, scanRef);
@@ -80,7 +82,7 @@ namespace BadgeSwipeApp
             if (scanWorkplace.active_reference != scanRef.reference_number)
             {
                 //Save details of reference already in that workplace
-                References oldRef = new References();
+                Refs oldRef = new Refs();
                 oldRef.reference_number = scanWorkplace.active_reference;
                 FillReference(connection, oldRef);
 
@@ -89,7 +91,7 @@ namespace BadgeSwipeApp
                     // Check for "Reaper Job"
                     if (reaper)
                     {
-                        // Do nothing if Reaper Job exists
+                        // Do something if Reaper Job exists
                         process_complete = true;
                     }
                         
@@ -127,7 +129,7 @@ namespace BadgeSwipeApp
         // These functions generate and/or send the Sisteplant Captor Frames
         // -----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void MakeFrame(bool status, References Ref, Workplaces Workplace)
+        public void MakeFrame(bool status, Refs Ref, Workplaces Workplace)
         {
             // Input Reference : INPM,Reference,Workplace,Headstock1 | Headstock2 |…..| HeadstockN
             // Output Reference: OUTM,Reference,Workplace,Headstock1 | Headstock2 |…..| HeadstockN
@@ -147,7 +149,7 @@ namespace BadgeSwipeApp
                 // Headstock?
             }
 
-            send_frame(Frame);
+            //send_frame(Frame);
             write_frame(Frame);
                 
         }
@@ -179,14 +181,14 @@ namespace BadgeSwipeApp
         // **UTILITY**
         // These functions are more all-purpose database manipulators
         // -----------------------------------------------------------------------------------------------------------------------------------------------------
-        public void getEntry(QC.SqlConnection connection, RefData reference)
+        public void getEntry(QC.SqlConnection connection, RefEntry reference)
         {
             using (var command = new QC.SqlCommand())
             {
                 command.Connection = connection;
                 command.CommandType = DT.CommandType.Text;
                 command.CommandText = @"
-        SELECT sent_workplace, sent_ref
+        SELECT sent_workplace, sent_ref, timestamp
         FROM RefData
         WHERE entry_number = " + GlobalVar.StartRef + ";";
 
@@ -196,13 +198,14 @@ namespace BadgeSwipeApp
                 {
                     reference.sent_workplace = reader.SafeGetInt(0);
                     reference.sent_ref = reader.SafeGetInt(1);
+                    reference.timestamp = reader.GetDateTime(2);
                 }
                 reader.Close();
 
             }
         }
 
-        public void change_login_status(QC.SqlConnection connection, References reference, bool status)
+        public void change_login_status(QC.SqlConnection connection, Refs reference, bool status)
         {
             // CHANGE IN DATABASE 
             using (var command = new QC.SqlCommand())
@@ -218,7 +221,7 @@ namespace BadgeSwipeApp
             }
         }
 
-        public void change_workplace_reference(QC.SqlConnection connection, References Ref, Workplaces Workplace)
+        public void change_workplace_reference(QC.SqlConnection connection, Refs Ref, Workplaces Workplace)
         {
             using (var command = new QC.SqlCommand())
             {
@@ -232,7 +235,7 @@ namespace BadgeSwipeApp
             }
         }
 
-        public void FillReference(QC.SqlConnection connection, References reference)
+        public void FillReference(QC.SqlConnection connection, Refs reference)
         {
             using (var command = new QC.SqlCommand())
             {

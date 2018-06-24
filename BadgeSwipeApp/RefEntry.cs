@@ -6,10 +6,11 @@ using System.Threading.Tasks;
 
 namespace BadgeSwipeApp
 {
-    class RefData
+    class RefEntry
     {
         public int entry_number { get; set; }
         public int sent_workplace { get; set; }
         public int sent_ref { get; set; }
+        public DateTime timestamp { get; set; }
     }
 }

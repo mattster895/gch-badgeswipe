@@ -51,12 +51,12 @@
     <Compile Include="GlobalVar.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RefData.cs" />
-    <Compile Include="References.cs" />
+    <Compile Include="RefEntry.cs" />
+    <Compile Include="Refs.cs" />
     <Compile Include="RefManager.cs" />
     <Compile Include="RefWatcher.cs" />
     <Compile Include="SQLReaderExtensions.cs" />
-    <Compile Include="SwipeData.cs" />
+    <Compile Include="SwipeEntry.cs" />
     <Compile Include="SwipeManager.cs" />
     <Compile Include="SwipeWatcher.cs" />
     <Compile Include="Workers.cs" />

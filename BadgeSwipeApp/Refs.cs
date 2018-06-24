@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace BadgeSwipeApp
 {
-    class References
+    class Refs
     {
         public int reference_number { get; set; }
         public string part_number { get; set; }
