@@ -134,17 +134,23 @@ namespace BadgeSwipeApp
             // Input Reference : INPM,Reference,Workplace,Headstock1 | Headstock2 |…..| HeadstockN
             // Output Reference: OUTM,Reference,Workplace,Headstock1 | Headstock2 |…..| HeadstockN
 
+
+            // In the SQL database, dual sided lasers are labeled as LASERX A and LASERX B, this trimset cuts it down to the Captor LASERX name
+            char[] LaserStringTrim = { 'A', 'B', ' ' };
+
+            // Start with a blank frame
             string Frame = "";
+
             // send in frame
             if (status)
             {
-                Frame = "INPM," + Ref.part_number.Trim() + "," + Workplace.workplace_name.Trim();
+                Frame = "INPM," + Ref.part_number.Trim() + "," + Workplace.workplace_name.Trim(LaserStringTrim);
                 
                 // Headstock?
             }
             if (!status)
             {
-                Frame = "OUTM," + Ref.part_number.Trim() + "," + Workplace.workplace_name.Trim();
+                Frame = "OUTM," + Ref.part_number.Trim() + "," + Workplace.workplace_name.Trim(LaserStringTrim);
 
                 // Headstock?
             }
