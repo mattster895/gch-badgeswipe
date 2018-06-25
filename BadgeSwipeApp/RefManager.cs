@@ -136,8 +136,8 @@ namespace BadgeSwipeApp
 
 
             // In the SQL database, dual sided lasers are labeled as LASERX A and LASERX B, this trimset cuts it down to the Captor LASERX name
-            char[] LaserStringTrim = { 'A', 'B', ' ' };
-            char[] LaserStringTrim2 = { 'L', 'A', 'S', 'E', 'R', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', };
+            char[] LaserStringTrim = { 'A', 'B', ' ' }; // good
+            char[] HeadstockStringTrim = { 'L', 'A', 'S', 'E', 'R', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', }; //lol
 
             // Start with a blank frame
             string Frame = "";
@@ -145,30 +145,30 @@ namespace BadgeSwipeApp
             // send in frame
             if (status)
             {
-                Frame = "INPM," + Ref.part_number.Trim() + "," + Workplace.workplace_name.Trim(LaserStringTrim);
-                if (Workplace.workplace_name.Trim(LaserStringTrim2).Contains('A'))
+                Frame = "INPM," + Ref.manufacturing_reference.Trim() + "," + Workplace.workplace_name.Trim(LaserStringTrim);
+                if (Workplace.workplace_name.Trim(HeadstockStringTrim).Contains('A'))
                 {
-                    Frame = Frame + ",SIDE A";
+                    Frame = Frame + ",Headstock1";
                 }
-                if (Workplace.workplace_name.Trim(LaserStringTrim2).Contains('B'))
+                if (Workplace.workplace_name.Trim(HeadstockStringTrim).Contains('B'))
                 {
-                    Frame = Frame + ",SIDE B";
+                    Frame = Frame + ",Headstock2";
                 }
             }
             if (!status)
             {
-                Frame = "OUTM," + Ref.part_number.Trim() + "," + Workplace.workplace_name.Trim(LaserStringTrim);
-                if (Workplace.workplace_name.Trim(LaserStringTrim2).Contains('A'))
+                Frame = "OUTM," + Ref.manufacturing_reference.Trim() + "," + Workplace.workplace_name.Trim(LaserStringTrim);
+                if (Workplace.workplace_name.Trim(HeadstockStringTrim).Contains('A'))
                 {
-                    Frame = Frame + ",SIDE A";
+                    Frame = Frame + ",Headstock1";
                 }
-                if (Workplace.workplace_name.Trim(LaserStringTrim2).Contains('B'))
+                if (Workplace.workplace_name.Trim(HeadstockStringTrim).Contains('B'))
                 {
-                    Frame = Frame + ",SIDE B";
+                    Frame = Frame + ",Headstock2";
                 }
             }
 
-            send_frame(Frame);
+            //send_frame(Frame);
             write_frame(Frame);
                 
         }
@@ -267,13 +267,14 @@ namespace BadgeSwipeApp
                 QC.SqlDataReader reader = command.ExecuteReader();
                 while (reader.Read())
                 {
-                    reference.part_number = reader.SafeGetString(1);
-                    reference.program_specification = reader.SafeGetString(2);
-                    reference.cycle_time = reader.SafeGetInt(3);
-                    reference.parts_produced = reader.SafeGetInt(4);
-                    reference.workplace_id = reader.SafeGetInt(5);
-                    reference.workplace_name = reader.SafeGetString(6);
-                    reference.login_status = reader.GetBoolean(7);
+                    reference.part_number = reader.SafeGetString(reference.part_number_record);
+                    reference.manufacturing_reference = reader.SafeGetString(reference.manufacturing_reference_record);
+                    reference.program_specification = reader.SafeGetString(reference.program_specification_record);
+                    reference.cycle_time = reader.SafeGetInt(reference.cycle_time_record);
+                    reference.parts_produced = reader.SafeGetInt(reference.parts_produced_record);
+                    reference.workplace_id = reader.SafeGetInt(reference.workplace_id_record);
+                    reference.workplace_name = reader.SafeGetString(reference.workplace_name_record);
+                    reference.login_status = reader.GetBoolean(reference.login_status_record);
                 }
                 reader.Close();
             }
@@ -283,6 +284,7 @@ namespace BadgeSwipeApp
             Console.WriteLine("----------------------");
             Console.WriteLine("Reference Number = " + reference.reference_number);
             Console.WriteLine("Part Number = " + reference.part_number);
+            Console.WriteLine("Manufacturing Reference = " + reference.manufacturing_reference);
             Console.WriteLine("Program Specification = " + reference.program_specification);
             Console.WriteLine("Cycle Time = " + reference.cycle_time);
             Console.WriteLine("Parts Produced = " + reference.parts_produced);
