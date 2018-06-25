@@ -137,6 +137,7 @@ namespace BadgeSwipeApp
 
             // In the SQL database, dual sided lasers are labeled as LASERX A and LASERX B, this trimset cuts it down to the Captor LASERX name
             char[] LaserStringTrim = { 'A', 'B', ' ' };
+            char[] LaserStringTrim2 = { 'L', 'A', 'S', 'E', 'R', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', };
 
             // Start with a blank frame
             string Frame = "";
@@ -145,17 +146,29 @@ namespace BadgeSwipeApp
             if (status)
             {
                 Frame = "INPM," + Ref.part_number.Trim() + "," + Workplace.workplace_name.Trim(LaserStringTrim);
-                
-                // Headstock?
+                if (Workplace.workplace_name.Trim(LaserStringTrim2).Contains('A'))
+                {
+                    Frame = Frame + ",SIDE A";
+                }
+                if (Workplace.workplace_name.Trim(LaserStringTrim2).Contains('B'))
+                {
+                    Frame = Frame + ",SIDE B";
+                }
             }
             if (!status)
             {
                 Frame = "OUTM," + Ref.part_number.Trim() + "," + Workplace.workplace_name.Trim(LaserStringTrim);
-
-                // Headstock?
+                if (Workplace.workplace_name.Trim(LaserStringTrim2).Contains('A'))
+                {
+                    Frame = Frame + ",SIDE A";
+                }
+                if (Workplace.workplace_name.Trim(LaserStringTrim2).Contains('B'))
+                {
+                    Frame = Frame + ",SIDE B";
+                }
             }
 
-            //send_frame(Frame);
+            send_frame(Frame);
             write_frame(Frame);
                 
         }
