@@ -168,7 +168,7 @@ namespace BadgeSwipeApp
                 }
             }
 
-            //send_frame(Frame);
+            send_frame(Frame);
             write_frame(Frame);
                 
         }
