@@ -41,7 +41,7 @@ namespace BadgeSwipeApp
                     while (GlobalVar.RefNum > 0)
                     {
                         getEntry(connectionEntryDB, currentRef);
-
+                    
                         //Console.WriteLine("Writing Frame for Last Ref");
                         //Console.WriteLine("Ref - " + currentRef.sent_ref);
                         //Console.WriteLine("Workplace - " + currentRef.sent_workplace);
@@ -147,11 +147,11 @@ namespace BadgeSwipeApp
                 Frame = "INPM," + Ref.manufacturing_reference.Trim() + "," + "LASER3";
                 if (Workplace.workplace_name.Trim().EndsWith("A"))
                 {
-                    Frame = Frame + ",Headstock1";
+                    Frame = Frame + ",SIDE A";
                 }
                 if (Workplace.workplace_name.Trim().EndsWith("B"))
                 {
-                    Frame = Frame + ",Headstock2";
+                    Frame = Frame + ",SIDE B";
                 }
             }
             if (!status)
@@ -159,16 +159,16 @@ namespace BadgeSwipeApp
                 Frame = "OUTM," + Ref.manufacturing_reference.Trim() + "," + "LASER3";
                 if (Workplace.workplace_name.Trim().EndsWith("A"))
                 {
-                    Frame = Frame + ",Headstock1";
+                    Frame = Frame + ",SIDE A";
                 }
                 if (Workplace.workplace_name.Trim().EndsWith("B"))
                 {
-                    Frame = Frame + ",Headstock2";
+                    Frame = Frame + ",SIDE B";
                 }
             }
 
             Console.WriteLine(Frame);
-            //send_frame(Frame);
+            send_frame(Frame);
             write_frame(Frame);
                 
         }
