@@ -63,7 +63,7 @@ namespace BadgeSwipeApp
         public void RefProcess(QC.SqlConnection connection, RefEntry refEntry)
         {
             bool process_complete = false;
-            bool reaper = false;
+            bool repair = false;
 
             // Save scanned reference details
             Refs scanRef = new Refs();
@@ -86,12 +86,14 @@ namespace BadgeSwipeApp
                 oldRef.reference_number = scanWorkplace.active_reference;
                 FillReference(connection, oldRef);
 
+             
+
                 if (scanRef.reference_number == 0)
                 {
-                    // Check for "Reaper Job"
-                    if (reaper)
+                    // Check for "Repair Job"
+                    if (repair)
                     {
-                        // Do something if Reaper Job exists
+                        // Do something if Repair Job exists
                         process_complete = true;
                     }
                         
@@ -104,18 +106,19 @@ namespace BadgeSwipeApp
                     // Log out current reference
                     if (oldRef.reference_number != 0)
                     {
-                        change_login_status(connection, oldRef, false);
-                        MakeFrame(false, oldRef, scanWorkplace);
+
+                        change_ref_log(connection, oldRef, scanWorkplace, false);
+                        
                     }
 
                     // Log in new reference
                     if(scanRef.reference_number != 0)
                     {
-                        change_login_status(connection, scanRef, true);
-                        MakeFrame(true, scanRef, scanWorkplace);
+
+                        change_ref_log(connection, scanRef, scanWorkplace, true);
+
                     }
                     change_workplace_reference(connection, scanRef, scanWorkplace);
-
                 }
             }
 
@@ -144,7 +147,7 @@ namespace BadgeSwipeApp
             // send in frame
             if (status)
             {
-                Frame = "INPM," + Ref.manufacturing_reference.Trim() + "," + "LASER3";
+                Frame = "INPM," + Ref.manufacturing_reference.Trim() + "," + "LASER10";
                 if (Workplace.workplace_name.Trim().EndsWith("A"))
                 {
                     Frame = Frame + ",SIDE A";
@@ -156,7 +159,7 @@ namespace BadgeSwipeApp
             }
             if (!status)
             {
-                Frame = "OUTM," + Ref.manufacturing_reference.Trim() + "," + "LASER3";
+                Frame = "OUTM," + Ref.manufacturing_reference.Trim() + "," + "LASER10";
                 if (Workplace.workplace_name.Trim().EndsWith("A"))
                 {
                     Frame = Frame + ",SIDE A";
@@ -272,6 +275,7 @@ namespace BadgeSwipeApp
                     reference.program_specification = reader.SafeGetString(reference.program_specification_record);
                     reference.cycle_time = reader.SafeGetInt(reference.cycle_time_record);
                     reference.parts_produced = reader.SafeGetInt(reference.parts_produced_record);
+                    reference.child_reference = reader.SafeGetInt(reference.child_reference_record);
                     reference.workplace_id = reader.SafeGetInt(reference.workplace_id_record);
                     reference.workplace_name = reader.SafeGetString(reference.workplace_name_record);
                     reference.login_status = reader.GetBoolean(reference.login_status_record);
@@ -321,5 +325,35 @@ namespace BadgeSwipeApp
             }
         }
 
+        public void change_ref_log(QC.SqlConnection connection, Refs refs, Workplaces workplace, bool status)
+        {
+            if (status)
+            {
+                int tempHold;
+                change_login_status(connection, refs, true);
+                MakeFrame(true, refs, workplace);
+                if (refs.child_reference != 0)
+                {
+                    tempHold = refs.reference_number;
+                    refs.reference_number = refs.child_reference;
+                    FillReference(connection, refs);
+                    change_ref_log(connection, refs, workplace, true);
+                    refs.reference_number = tempHold;
+                    FillReference(connection, refs);
+                }
+            }
+        
+            if (!status)
+            {
+                change_login_status(connection, refs, false);
+                MakeFrame(false, refs, workplace);
+                if (refs.child_reference != 0)
+                {
+                    refs.reference_number = refs.child_reference;
+                    FillReference(connection, refs);
+                    change_ref_log(connection, refs, workplace, false);
+                }
+            }
+        }
     }
 }

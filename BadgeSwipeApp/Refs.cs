@@ -26,13 +26,16 @@ namespace BadgeSwipeApp
         public int parts_produced { get; set; }
         public int parts_produced_record = 5;
 
+        public int child_reference { get; set; }
+        public int child_reference_record = 6;
+
         public int workplace_id { get; set; }
-        public int workplace_id_record = 6;
+        public int workplace_id_record = 7;
 
         public string workplace_name { get; set; }
-        public int workplace_name_record = 7;
+        public int workplace_name_record = 8;
 
         public bool login_status { get; set; }
-        public int login_status_record = 8;
+        public int login_status_record = 9;
     }
 }
