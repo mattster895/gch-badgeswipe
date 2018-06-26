@@ -42,10 +42,10 @@ namespace BadgeSwipeApp
                     {
                         getEntry(connectionEntryDB, currentRef);
 
-                        Console.WriteLine("Writing Frame for Last Ref");
-                        Console.WriteLine("Ref - " + currentRef.sent_ref);
-                        Console.WriteLine("Workplace - " + currentRef.sent_workplace);
-                        Console.WriteLine("Timestamp - " + currentRef.timestamp);
+                        //Console.WriteLine("Writing Frame for Last Ref");
+                        //Console.WriteLine("Ref - " + currentRef.sent_ref);
+                        //Console.WriteLine("Workplace - " + currentRef.sent_workplace);
+                        //Console.WriteLine("Timestamp - " + currentRef.timestamp);
                 
                         //Console.WriteLine("Start Ref - " + GlobalVar.StartRef);
                         //Console.WriteLine("RefNum - " + GlobalVar.RefNum);
@@ -137,7 +137,6 @@ namespace BadgeSwipeApp
 
             // In the SQL database, dual sided lasers are labeled as LASERX A and LASERX B, this trimset cuts it down to the Captor LASERX name
             char[] LaserStringTrim = { 'A', 'B', ' ' }; // good
-            char[] HeadstockStringTrim = { 'L', 'A', 'S', 'E', 'R', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', }; //lol
 
             // Start with a blank frame
             string Frame = "";
@@ -146,11 +145,11 @@ namespace BadgeSwipeApp
             if (status)
             {
                 Frame = "INPM," + Ref.manufacturing_reference.Trim() + "," + "LASER3";
-                if (Workplace.workplace_name.Trim(HeadstockStringTrim).Contains('A'))
+                if (Workplace.workplace_name.Trim().EndsWith("A"))
                 {
                     Frame = Frame + ",Headstock1";
                 }
-                if (Workplace.workplace_name.Trim(HeadstockStringTrim).Contains('B'))
+                if (Workplace.workplace_name.Trim().EndsWith("B"))
                 {
                     Frame = Frame + ",Headstock2";
                 }
@@ -158,17 +157,18 @@ namespace BadgeSwipeApp
             if (!status)
             {
                 Frame = "OUTM," + Ref.manufacturing_reference.Trim() + "," + "LASER3";
-                if (Workplace.workplace_name.Trim(HeadstockStringTrim).Contains('A'))
+                if (Workplace.workplace_name.Trim().EndsWith("A"))
                 {
                     Frame = Frame + ",Headstock1";
                 }
-                if (Workplace.workplace_name.Trim(HeadstockStringTrim).Contains('B'))
+                if (Workplace.workplace_name.Trim().EndsWith("B"))
                 {
                     Frame = Frame + ",Headstock2";
                 }
             }
 
-            send_frame(Frame);
+            Console.WriteLine(Frame);
+            //send_frame(Frame);
             write_frame(Frame);
                 
         }
@@ -279,18 +279,18 @@ namespace BadgeSwipeApp
                 reader.Close();
             }
 
-            Console.WriteLine();
-            Console.WriteLine("DEBUG");
-            Console.WriteLine("----------------------");
-            Console.WriteLine("Reference Number = " + reference.reference_number);
-            Console.WriteLine("Part Number = " + reference.part_number);
-            Console.WriteLine("Manufacturing Reference = " + reference.manufacturing_reference);
-            Console.WriteLine("Program Specification = " + reference.program_specification);
-            Console.WriteLine("Cycle Time = " + reference.cycle_time);
-            Console.WriteLine("Parts Produced = " + reference.parts_produced);
-            Console.WriteLine("Workplace ID = " + reference.workplace_id);
-            Console.WriteLine("Workplace Name = " + reference.workplace_name);
-            Console.WriteLine("Login Status = " + reference.login_status);
+            //Console.WriteLine();
+            //Console.WriteLine("DEBUG");
+            //Console.WriteLine("----------------------");
+            //Console.WriteLine("Reference Number = " + reference.reference_number);
+            //Console.WriteLine("Part Number = " + reference.part_number);
+            //Console.WriteLine("Manufacturing Reference = " + reference.manufacturing_reference);
+            //Console.WriteLine("Program Specification = " + reference.program_specification);
+            //Console.WriteLine("Cycle Time = " + reference.cycle_time);
+            //Console.WriteLine("Parts Produced = " + reference.parts_produced);
+            //Console.WriteLine("Workplace ID = " + reference.workplace_id);
+            //Console.WriteLine("Workplace Name = " + reference.workplace_name);
+            //Console.WriteLine("Login Status = " + reference.login_status);
             
         }
 
