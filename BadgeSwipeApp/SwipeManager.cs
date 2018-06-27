@@ -86,47 +86,54 @@ namespace BadgeSwipeApp
             // Check if ID exists. If not, add to the workers database
             if (!CheckExist(connection, swipeWorker))
             {
-                //Console.WriteLine("CREATE WORKER ID");
-                using (var command = new QC.SqlCommand())
-                {
-                    command.Connection = connection;
-                    command.CommandType = DT.CommandType.Text;
-                    command.CommandText = @"
-                    INSERT
-                    INTO Workers (worker_id, worker_clearance, login_status)
-                    VALUES (" + swipeWorker.worker_id + ", 1, 'FALSE');";
-                    command.ExecuteNonQuery();
-                }
+                add_new_worker(connection, swipeWorker);
             }
+            
             // Check if Workplace exists. If not, bad scan, dump it.
                 // TO BE IMPLEMENTED
             
-            // What are we doing? Logging in or logging out?
+            
 
             // If worker exists
-            if (swipeWorker.worker_id != 0)
+            if (swipeWorker.worker_id != 0 && swipeWorker.worker_clearance != 0)
             {
-                // Logout of old workplace if necessary
-                if (swipeWorker.login_status)
+                // If worker is already logged in somewhere
+                
                 {
-                    if (oldWorkplace.workplace_exclusive)
+
+                    // Are they badging out?
+                    if (oldWorkplace.workplace_id == newWorkplace.workplace_id)
                     {
-                        change_login_status(connection, swipeWorker.worker_id, false);
-                        MakeFrame(false, swipeWorker.worker_id, oldWorkplace.workplace_name, oldWorkplace.sibling_workplace_name);
-                        if(oldWorkplace.workplace_id == newWorkplace.workplace_id)
-                        {
-                            processComplete = true;
-                        }
+                        change_login_status(connection, swipeWorker, false);
+
+                        // // if unique, set workplace worker entry to null
+                        // change_workplace_worker();
+
+                        // // if not unique, set workplace worker entry to first person still logged into this cell
+                        // SQL to return where login = true and activeWorkplace.workplace_id = old/newWorkplace.workplace_id
+
+                        processComplete = true;
                     }
-                    else if (newWorkplace.active_operator == swipeWorker.worker_id)
+
+                    // Is the worker's old cell exclusive,
+                    // or the worker's new cell exclusive (?)
+                    // log them out of the old cell
+                    else if (oldWorkplace.workplace_exclusive || newWorkplace.workplace_exclusive)
                     {
-                        change_workplace_worker(connection,newWorkplace.workplace_id,newWorkplace.sibling_workplace,0,swipeWorker.worker_id);
-                        MakeFrame(false, swipeWorker.worker_id, newWorkplace.workplace_name, newWorkplace.sibling_workplace_name);
+                        change_login_status(connection, swipeWorker, false);
+                        MakeFrame(false, swipeWorker, oldWorkplace);
+
+
+                    }
+                    // uh, this might not be the best way to do this thing.
+                    { 
+                        //change_workplace_worker(connection,newWorkplace.workplace_id,newWorkplace.sibling_workplace,0,swipeWorker.worker_id);
+                        MakeFrame(false, swipeWorker, newWorkplace);
                         
                         // If worker is not logged in anywhere else, set login to FALSE
                         if(!CheckForWorkerLoggedIn(connection, swipeWorker.worker_id))
                         {
-                            change_login_status(connection, swipeWorker.worker_id, false);
+                            change_login_status(connection, swipeWorker, false);
                         }
                         processComplete = true;
                     }
@@ -138,21 +145,21 @@ namespace BadgeSwipeApp
                     if(newWorkplace.workplace_unique && !CheckNull(connection,newWorkplace.workplace_id))
                     {
                         // log out current worker
-                        change_workplace_worker(connection, newWorkplace.workplace_id, newWorkplace.sibling_workplace, swipeWorker.worker_id, newWorkplace.active_operator);
-                        MakeFrame(false, newWorkplace.active_operator, newWorkplace.workplace_name, newWorkplace.sibling_workplace_name);
+                        //change_workplace_worker(connection, newWorkplace.workplace_id, newWorkplace.sibling_workplace, swipeWorker.worker_id, newWorkplace.active_operator);
+                        //MakeFrame(false, newWorkplace.active_operator, newWorkplace.workplace_name, newWorkplace.sibling_workplace_name);
                         // If worker is not logged in anywhere else, set login to FALSE
                         if (!CheckForWorkerLoggedIn(connection, newWorkplace.active_operator))
                         {
-                            change_login_status(connection, newWorkplace.active_operator, false);
+                            //change_login_status(connection, newWorkplace.active_operator, false);
                         }
                     }
                     if(newWorkplace.workplace_unique && CheckNull(connection, newWorkplace.workplace_id))
                     {
-                        change_workplace_worker(connection, newWorkplace.workplace_id, newWorkplace.sibling_workplace, swipeWorker.worker_id, 0);
+                        //change_workplace_worker(connection, newWorkplace.workplace_id, newWorkplace.sibling_workplace, swipeWorker.worker_id, 0);
                     }
                     
-                    change_login_status(connection, swipeWorker.worker_id, true);
-                    MakeFrame(true, swipeWorker.worker_id, newWorkplace.workplace_name, newWorkplace.sibling_workplace_name);
+                    //change_login_status(connection, swipeWorker.worker_id, true);
+                    //MakeFrame(true, swipeWorker.worker_id, newWorkplace.workplace_name, newWorkplace.sibling_workplace_name);
                     change_worker_workplace(connection, swipeWorker.worker_id, newWorkplace.workplace_name, newWorkplace.sibling_workplace_name, newWorkplace.workplace_id, newWorkplace.sibling_workplace);
                 }           
 
@@ -165,25 +172,25 @@ namespace BadgeSwipeApp
         // These functions generate and/or send the Sisteplant Captor Frames
         // -----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void MakeFrame(bool status, int worker_id, string workplace_name, string second_workplace_name)
+        public void MakeFrame(bool status, Workers worker, Workplaces workplace)
         {
             string Frame = "";
             // send in frame (single/double)
             if (status)
             {
-                Frame = "INPW," + worker_id + "," + workplace_name.Trim();
-                if (second_workplace_name != string.Empty && second_workplace_name != "")
+                Frame = "INPW," + worker.worker_id + "," + workplace.workplace_name.Trim();
+                if (workplace.sibling_workplace_name != string.Empty && workplace.sibling_workplace_name != "")
                 {
-                    Frame += "," + second_workplace_name;
+                    Frame += "," + workplace.sibling_workplace_name.Trim();
                 }
             }
             // send out frame (single/double)
             if (!status)
             {
-                Frame = "OUTW," + worker_id + "," + workplace_name.Trim();
-                if (second_workplace_name != string.Empty && second_workplace_name != "")
+                Frame = "OUTW," + worker.worker_id + "," + workplace.workplace_name.Trim();
+                if (workplace.sibling_workplace_name != string.Empty && workplace.sibling_workplace_name != "")
                 {
-                    Frame += "," + second_workplace_name;
+                    Frame += "," + workplace.sibling_workplace_name.Trim();
                 }
             }
             //send_frame(Frame); // Disabled for testing
@@ -241,7 +248,7 @@ namespace BadgeSwipeApp
             }
         }
 
-        public void change_login_status(QC.SqlConnection connection, int worker_id, bool status)
+        public void change_login_status(QC.SqlConnection connection, Workers worker, bool status)
         {
             // CHANGE IN DATABASE 
             using (var command = new QC.SqlCommand())
@@ -251,9 +258,8 @@ namespace BadgeSwipeApp
                 command.CommandText = @"
                 UPDATE Workers 
                 SET login_status = '" + status + "'" +
-                "WHERE worker_id = " + worker_id + ";";
+                "WHERE worker_id = " + worker.worker_id + ";";
                 command.ExecuteNonQuery();
-                //Console.WriteLine("Change Log Status - Executed");
             }
         }
 
@@ -279,6 +285,32 @@ namespace BadgeSwipeApp
                 else
                 return true;
             }
+        }
+
+        public void add_new_worker(QC.SqlConnection connection, Workers worker)
+        {
+           // Add to the Worker Database
+           // 0 - Unassigned
+           // 1 - Staff
+           // 2 - Staff2
+           // 3 - Maintenance
+           // 4 - Maint-AR
+           // 5 - Tool and Die
+           // 6 - Training
+
+            using (var command = new QC.SqlCommand())
+            {
+                command.Connection = connection;
+                command.CommandType = DT.CommandType.Text;
+                command.CommandText = @"
+                    INSERT
+                    INTO Workers (worker_id, worker_clearance, login_status)
+                    VALUES (" + worker.worker_id + ", 0, 'FALSE');";
+                command.ExecuteNonQuery();
+            }
+
+            // Alert me, because this honestly should only be called in error
+
         }
 
         public bool CheckNull(QC.SqlConnection connection, int id)
@@ -369,9 +401,9 @@ namespace BadgeSwipeApp
         // **WORKPLACE FUNCTIONS**
         // These functions deal with the workplace table in the database
         // -----------------------------------------------------------------------------------------------------------------------------------------------------
-        public void change_workplace_worker(QC.SqlConnection connection, int workplace_id, int sibling_id, int worker_id, int old_worker_id)
+        public void change_workplace_worker(QC.SqlConnection connection, Workplaces workplace, Workers worker)
         {
-            if (worker_id == 0)
+            if (worker.worker_id == 0)
             {
                 using (var command = new QC.SqlCommand())
                 {
@@ -380,13 +412,13 @@ namespace BadgeSwipeApp
                     command.CommandText = @"
                         UPDATE Workplaces
                         SET active_operator = NULL " +
-                        "WHERE active_operator = " + old_worker_id + 
-                        "AND (workplace_id = " + workplace_id + " OR workplace_id = " + sibling_id + ");";
+                        "WHERE active_operator = " + workplace.active_operator + 
+                        "AND (workplace_id = " + workplace.workplace_id + " OR workplace_id = " + workplace.sibling_workplace + ");";
                     command.ExecuteNonQuery();
                     //Console.WriteLine("Change Workplace - Executed");
                 }
             }
-            else if(old_worker_id == 0)
+            else if(workplace.active_operator == 0)
             {
                 using (var command = new QC.SqlCommand())
                 {
@@ -394,9 +426,9 @@ namespace BadgeSwipeApp
                     command.CommandType = DT.CommandType.Text;
                     command.CommandText = @"
                 UPDATE Workplaces
-                SET active_operator = " + worker_id +
-                "WHERE workplace_id = " + workplace_id + 
-                " OR workplace_id = " + sibling_id + ";";
+                SET active_operator = " + worker.worker_id +
+                "WHERE workplace_id = " + workplace.workplace_id + 
+                " OR workplace_id = " + workplace.sibling_workplace + ";";
                 command.ExecuteNonQuery();
                 //Console.WriteLine("Change Workplace - Executed");
                 }
@@ -409,9 +441,9 @@ namespace BadgeSwipeApp
                     command.CommandType = DT.CommandType.Text;
                     command.CommandText = @"
                         UPDATE Workplaces
-                        SET active_operator = " + worker_id + 
-                        "WHERE active_operator = " + old_worker_id +
-                        "AND (workplace_id = " + workplace_id + " OR workplace_id = " + sibling_id + ");";
+                        SET active_operator = " + worker.worker_id + 
+                        "WHERE active_operator = " + //old_worker_id +
+                        "AND (workplace_id = " + //workplace_id + " OR workplace_id = " + sibling_id + ");";
                             command.ExecuteNonQuery();
                     //Console.WriteLine("Change Workplace - Executed");
                 }

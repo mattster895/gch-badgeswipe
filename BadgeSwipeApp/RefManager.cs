@@ -147,7 +147,7 @@ namespace BadgeSwipeApp
             // send in frame
             if (status)
             {
-                Frame = "INPM," + Ref.manufacturing_reference.Trim() + "," + "LASER10";
+                Frame = "INPM," + Ref.manufacturing_reference.Trim() + "," + Workplace.workplace_name.Trim(LaserStringTrim);
                 if (Workplace.workplace_name.Trim().EndsWith("A"))
                 {
                     Frame = Frame + ",SIDE A";
@@ -159,7 +159,7 @@ namespace BadgeSwipeApp
             }
             if (!status)
             {
-                Frame = "OUTM," + Ref.manufacturing_reference.Trim() + "," + "LASER10";
+                Frame = "OUTM," + Ref.manufacturing_reference.Trim() + "," + Workplace.workplace_name.Trim(LaserStringTrim);
                 if (Workplace.workplace_name.Trim().EndsWith("A"))
                 {
                     Frame = Frame + ",SIDE A";
@@ -170,7 +170,6 @@ namespace BadgeSwipeApp
                 }
             }
 
-            Console.WriteLine(Frame);
             send_frame(Frame);
             write_frame(Frame);
                 
@@ -227,22 +226,6 @@ namespace BadgeSwipeApp
             }
         }
 
-        public void change_login_status(QC.SqlConnection connection, Refs reference, bool status)
-        {
-            // CHANGE IN DATABASE 
-            using (var command = new QC.SqlCommand())
-            {
-                command.Connection = connection;
-                command.CommandType = DT.CommandType.Text;
-                command.CommandText = @"
-                UPDATE Refs 
-                SET login_status = '" + status + "'" +
-                "WHERE reference_number = " + reference.reference_number + ";";
-                command.ExecuteNonQuery();
-                //Console.WriteLine("Change Log Status - Executed");
-            }
-        }
-
         public void change_workplace_reference(QC.SqlConnection connection, Refs Ref, Workplaces Workplace)
         {
             using (var command = new QC.SqlCommand())
@@ -276,9 +259,6 @@ namespace BadgeSwipeApp
                     reference.cycle_time = reader.SafeGetInt(reference.cycle_time_record);
                     reference.parts_produced = reader.SafeGetInt(reference.parts_produced_record);
                     reference.child_reference = reader.SafeGetInt(reference.child_reference_record);
-                    reference.workplace_id = reader.SafeGetInt(reference.workplace_id_record);
-                    reference.workplace_name = reader.SafeGetString(reference.workplace_name_record);
-                    reference.login_status = reader.GetBoolean(reference.login_status_record);
                 }
                 reader.Close();
             }
@@ -311,15 +291,15 @@ namespace BadgeSwipeApp
                 QC.SqlDataReader reader = command.ExecuteReader();
                 while (reader.Read())
                 {
-                    workplace.workplace_name = reader.SafeGetString(1);
-                    workplace.active_operator = reader.SafeGetInt(2);
-                    workplace.active_operator_name = reader.SafeGetString(3);
-                    workplace.active_operator_clearance = reader.SafeGetInt(4);
-                    workplace.active_reference = reader.SafeGetInt(5);
-                    workplace.sibling_workplace = reader.SafeGetInt(6);
-                    workplace.sibling_workplace_name = reader.SafeGetString(7);
-                    workplace.workplace_unique = reader.GetBoolean(8);
-                    workplace.workplace_exclusive = reader.GetBoolean(9);
+                    workplace.workplace_name = reader.SafeGetString(workplace.workplace_name_record);
+                    workplace.active_operator = reader.SafeGetInt(workplace.active_operator_record);
+                    workplace.active_operator_name = reader.SafeGetString(workplace.active_operator_name_record);
+                    workplace.active_operator_clearance = reader.SafeGetInt(workplace.active_operator_clearance_record);
+                    workplace.active_reference = reader.SafeGetInt(workplace.active_reference_record);
+                    workplace.sibling_workplace = reader.SafeGetInt(workplace.sibling_workplace_record);
+                    workplace.sibling_workplace_name = reader.SafeGetString(workplace.sibling_workplace_name_record);
+                    workplace.workplace_unique = reader.GetBoolean(workplace.workplace_unique_record);
+                    workplace.workplace_exclusive = reader.GetBoolean(workplace.workplace_exclusive_record);
                 }
                 reader.Close();
             }
@@ -330,7 +310,7 @@ namespace BadgeSwipeApp
             if (status)
             {
                 int tempHold;
-                change_login_status(connection, refs, true);
+                
                 MakeFrame(true, refs, workplace);
                 if (refs.child_reference != 0)
                 {
@@ -345,7 +325,7 @@ namespace BadgeSwipeApp
         
             if (!status)
             {
-                change_login_status(connection, refs, false);
+                
                 MakeFrame(false, refs, workplace);
                 if (refs.child_reference != 0)
                 {
