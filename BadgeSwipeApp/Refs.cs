@@ -29,5 +29,22 @@ namespace BadgeSwipeApp
         public int child_reference { get; set; }
         public int child_reference_record = 6;
 
+        public void debugPrint(bool debug)
+        {
+            if (debug)
+            {
+                Console.WriteLine();
+                Console.WriteLine("Debug Print Ref Details");
+                Console.WriteLine("-----------------------------");
+                Console.WriteLine("Reference Number - " + reference_number);
+                Console.WriteLine("Part Number - " + part_number);
+                Console.WriteLine("Manufacturing Reference - " + manufacturing_reference);
+                Console.WriteLine("Program Specification - " + program_specification);
+                Console.WriteLine("Cycle Time - " + cycle_time);
+                Console.WriteLine("Parts Produced - " + parts_produced);
+                Console.WriteLine("Child Reference - " + child_reference);
+            }       
+        }
+
     }
 }

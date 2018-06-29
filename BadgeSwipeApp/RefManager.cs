@@ -41,14 +41,8 @@ namespace BadgeSwipeApp
                     while (GlobalVar.RefNum > 0)
                     {
                         getEntry(connectionEntryDB, currentRef);
-                    
-                        //Console.WriteLine("Writing Frame for Last Ref");
-                        //Console.WriteLine("Ref - " + currentRef.sent_ref);
-                        //Console.WriteLine("Workplace - " + currentRef.sent_workplace);
-                        //Console.WriteLine("Timestamp - " + currentRef.timestamp);
-                
-                        //Console.WriteLine("Start Ref - " + GlobalVar.StartRef);
-                        //Console.WriteLine("RefNum - " + GlobalVar.RefNum);
+
+                        currentRef.debugPrint(GlobalVar.Debug);
 
                         RefProcess(connectionMainDB, currentRef);
                         worker.ReportProgress(0);
@@ -170,7 +164,7 @@ namespace BadgeSwipeApp
                 }
             }
 
-            send_frame(Frame);
+            //send_frame(Frame);
             write_frame(Frame);
                 
         }
@@ -293,8 +287,6 @@ namespace BadgeSwipeApp
                 {
                     workplace.workplace_name = reader.SafeGetString(workplace.workplace_name_record);
                     workplace.active_operator = reader.SafeGetInt(workplace.active_operator_record);
-                    workplace.active_operator_name = reader.SafeGetString(workplace.active_operator_name_record);
-                    workplace.active_operator_clearance = reader.SafeGetInt(workplace.active_operator_clearance_record);
                     workplace.active_reference = reader.SafeGetInt(workplace.active_reference_record);
                     workplace.sibling_workplace = reader.SafeGetInt(workplace.sibling_workplace_record);
                     workplace.sibling_workplace_name = reader.SafeGetString(workplace.sibling_workplace_name_record);

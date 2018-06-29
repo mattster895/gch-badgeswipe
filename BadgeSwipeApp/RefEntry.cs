@@ -19,5 +19,19 @@ namespace BadgeSwipeApp
 
         public DateTime timestamp { get; set; }
         public int timestamp_record = 3;
+
+        public void debugPrint(bool debug)
+        {
+            if (debug)
+            {
+                Console.WriteLine();
+                Console.WriteLine("Debug Print Ref Entry Details");
+                Console.WriteLine("-----------------------------");
+                Console.WriteLine("Entry Number - " + entry_number);
+                Console.WriteLine("Sent Workplace - " + sent_workplace);
+                Console.WriteLine("Sent Ref - " + sent_ref);
+                Console.WriteLine("Timestamp - " + timestamp);
+            }
+        }
     }
 }

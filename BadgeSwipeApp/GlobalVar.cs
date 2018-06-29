@@ -12,6 +12,7 @@ namespace BadgeSwipeApp
         static int _SwipeNum;
         static int _StartRef;
         static int _RefNum;
+        static bool _Debug;
 
         public static int StartSwipe
         {
@@ -58,6 +59,18 @@ namespace BadgeSwipeApp
             set
             {
                 _RefNum = value;
+            }
+        }
+
+        public static bool Debug
+        {
+            get
+            {
+                return _Debug;
+            }
+            set
+            {
+                _Debug = value;
             }
         }
 

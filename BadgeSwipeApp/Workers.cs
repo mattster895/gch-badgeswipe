@@ -23,13 +23,23 @@ namespace BadgeSwipeApp
         public string workplace_name { get; set; }
         public int workplace_name_record = 4;
 
-        public int secondary_workplace_id { get; set; }
-        public int secondary_workplace_id_record = 5;
-
-        public string secondary_workplace_name { get; set; }
-        public int secondary_workplace_name_record = 6;
-
         public bool login_status { get; set; }
-        public int login_status_record = 7;
+        public int login_status_record = 5;
+
+        public void debugPrint(bool debug)
+        {
+            if (debug)
+            {
+                Console.WriteLine();
+                Console.WriteLine("Debug Print Worker Details");
+                Console.WriteLine("-----------------------------");
+                Console.WriteLine("Worker ID - " + worker_id);
+                Console.WriteLine("Worker Name - " + worker_name);
+                Console.WriteLine("Worker Clearance - " + worker_clearance);
+                Console.WriteLine("Workplace ID - " + workplace_id);
+                Console.WriteLine("Workplace Name - " + workplace_name);
+                Console.WriteLine("Login Status - " + login_status);
+            }
+        }
     }
 }
