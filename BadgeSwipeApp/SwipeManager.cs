@@ -90,22 +90,29 @@ namespace BadgeSwipeApp
                     // Are they badging out?
                     if (query_logout(connection, swipeWorker, newWorkplace))
                     {
+
+                        // set login to false
+                        
                         change_login_status(connection, swipeWorker, false);
                         change_worker_workplace(connection, swipeWorker, false);
-                        MakeFrame(false, swipeWorker, oldWorkplace);
-
+                        MakeFrame(false, swipeWorker, newWorkplace);
+                        
                         // // if unique, set workplace worker entry to null
                         if (oldWorkplace.workplace_unique)
                         {
-                            change_workplace_worker(connection, oldWorkplace, false);
+                            change_workplace_worker(connection, newWorkplace, false);
                         }
 
                         // // else, set workplace worker entry to first person still logged into this cell
                         else
                         {
                             // SQL to return where login = true and activeWorkplace.workplace_id = old/newWorkplace.workplace_id
-                            change_workplace_worker(connection, oldWorkplace, true);
+                            change_workplace_worker(connection, newWorkplace, true);
                         }
+
+                        change_login_status(connection, swipeWorker, true);
+                        change_worker_workplace(connection, swipeWorker, true);
+
                         processComplete = true;
                     }
 
@@ -324,35 +331,42 @@ namespace BadgeSwipeApp
 
         public bool query_logout(QC.SqlConnection connection, Workers worker, Workplaces newWorkplace)
         {
+
+            int tempCheck = 0;
+
             // First, easy peasy. Is the current workers.workplace the same as the new one?
             if(worker.workplace_id == newWorkplace.workplace_id)
             {
                 return true;
             }
-            if (worker.workplace_id == newWorkplace.sibling_workplace)
+            else if (worker.workplace_id == newWorkplace.sibling_workplace)
             {
                 return true;
             }
             // Next, slightly less easy
-            using (var command = new QC.SqlCommand())
+            // using (var command = new QC.SqlCommand())
+            //{
+            //    command.Connection = connection;
+            //    command.CommandType = DT.CommandType.Text;
+            //    command.CommandText = "SELECT workplace_id FROM Workplaces WHERE active_operator = " + worker.worker_id + 
+            //                          " AND (workplace_id = " + newWorkplace.workplace_id + " OR sibling_workplace = " + newWorkplace.workplace_id + ");";
+            //    QC.SqlDataReader reader = command.ExecuteReader();
+            //    while (reader.Read())
+            //    {
+            //        tempCheck = reader.SafeGetInt(0);
+            //    }
+            //    reader.Close();
+            //}
+
+            //if ((tempCheck == newWorkplace.workplace_id) || (tempCheck == newWorkplace.sibling_workplace))
+            //    return true;
+
+            else if(worker.worker_id == newWorkplace.active_operator)
             {
-                command.Connection = connection;
-                command.CommandType = DT.CommandType.Text;
-                command.CommandText = "SELECT workplace_id FROM Workplaces WHERE active_operator = " + worker.worker_id + 
-                                      " AND (workplace_id = " + newWorkplace.workplace_id + " OR sibling_workplace = " + newWorkplace.workplace_id + ");";
-                QC.SqlDataReader reader = command.ExecuteReader();
-                while (reader.Read())
-                {
-                    if (reader.SafeGetInt(0) != 0)
-                    {
-                        reader.Close();
-                        return true;
-                    }
-                }
-                
+                return true;
             }
 
-
+            else
                 return false;
         }
         // -----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -362,8 +376,10 @@ namespace BadgeSwipeApp
 
             public bool worker_logged_in(QC.SqlConnection connection, Workers worker)
             {
-                using(var command = new QC.SqlCommand())
+            int check = 0;
+            using (var command = new QC.SqlCommand())
                 {
+                
                 command.Connection = connection;
                 command.CommandType = DT.CommandType.Text;
                 command.CommandText = @"
@@ -373,11 +389,13 @@ namespace BadgeSwipeApp
                 QC.SqlDataReader reader = command.ExecuteReader();
                 while (reader.Read())
                 {
-                    if (reader.SafeGetInt(0) != 0)
-                        return true;
+                    check = reader.SafeGetInt(0);
                 }
                 reader.Close();
             }
+            if (check != 0)
+                return true;
+            else
                 return false;
             }
 
@@ -440,8 +458,8 @@ namespace BadgeSwipeApp
                     command.CommandText = @"
                     UPDATE Workers
                     SET workplace_id = " + tempID +
-                    ",workplace_name = " + tempName +
-                    " WHERE worker_id = " + worker.worker_id + ";";
+                    ",workplace_name = '" + tempName +
+                    "' WHERE worker_id = " + worker.worker_id + ";";
                     command.ExecuteNonQuery();
                     worker.workplace_id = tempID;
                     worker.workplace_name = tempName;
