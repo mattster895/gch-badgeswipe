@@ -231,6 +231,7 @@ namespace BadgeSwipeApp
                 SET active_reference = " + Ref.reference_number +
                 "WHERE workplace_id = " + Workplace.workplace_id + ";";
                 command.ExecuteNonQuery();
+                Workplace.active_reference = Ref.reference_number;
             }
         }
 
