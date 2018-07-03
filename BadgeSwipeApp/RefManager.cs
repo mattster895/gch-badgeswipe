@@ -141,7 +141,7 @@ namespace BadgeSwipeApp
             // send in frame
             if (status)
             {
-                Frame = "INPM," + Ref.manufacturing_reference.Trim() + "," + Workplace.workplace_name.Trim(LaserStringTrim);
+                Frame = "INPM," + Ref.manufacturing_reference.Trim() + "," + Ref.order_version + "," + Workplace.workplace_name.Trim(LaserStringTrim);
                 if (Workplace.workplace_name.Trim().EndsWith("A"))
                 {
                     Frame = Frame + ",SIDE A";
@@ -153,7 +153,7 @@ namespace BadgeSwipeApp
             }
             if (!status)
             {
-                Frame = "OUTM," + Ref.manufacturing_reference.Trim() + "," + Workplace.workplace_name.Trim(LaserStringTrim);
+                Frame = "OUTM," + Ref.manufacturing_reference.Trim() + "," + Ref.order_version + "," + Workplace.workplace_name.Trim(LaserStringTrim);
                 if (Workplace.workplace_name.Trim().EndsWith("A"))
                 {
                     Frame = Frame + ",SIDE A";

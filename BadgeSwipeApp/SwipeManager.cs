@@ -172,6 +172,7 @@ namespace BadgeSwipeApp
                         {
                             // change their workplace to the first place they're logged in
                             change_worker_workplace(connection, oldWorker, true);
+                            change_login_status(connection, oldWorker, true);
                         }
                         
                         // Send logout frame
