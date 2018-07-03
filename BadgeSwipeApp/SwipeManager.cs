@@ -84,6 +84,12 @@ namespace BadgeSwipeApp
             if (swipeWorker.worker_id != 0 && swipeWorker.worker_clearance != 0)
             {
                 // Log out of old cells if necessary
+                
+                if(swipeWorker.login_status == true && swipeWorker.workplace_id == 0)
+                {
+                    change_login_status(connection, swipeWorker, false);
+                }
+
                 if(swipeWorker.login_status)
                 {
 
@@ -549,6 +555,7 @@ namespace BadgeSwipeApp
 
                     command.CommandText = @"
                     SELECT TOP 1 worker_id
+                    FROM Workers
                     WHERE workplace_id = " + workplace.workplace_id +
                     " OR workplace_id = " + workplace.sibling_workplace + ";";
                     QC.SqlDataReader reader = command.ExecuteReader();
@@ -561,8 +568,8 @@ namespace BadgeSwipeApp
                     command.CommandText = @"
                     UPDATE Workplaces
                     SET active_operator = " + tempID +
-                    "WHERE workplace id = " + workplace.workplace_id +
-                    " OR workplace_id = " + workplace.sibling_workplace + ";";
+                    " WHERE (workplace id = " + workplace.workplace_id +
+                    " OR workplace_id = " + workplace.sibling_workplace + ");";
                     command.ExecuteNonQuery();
 
                     workplace.active_operator = tempID;
