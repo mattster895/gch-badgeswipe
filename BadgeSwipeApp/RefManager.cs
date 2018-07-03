@@ -250,6 +250,7 @@ namespace BadgeSwipeApp
                 {
                     reference.part_number = reader.SafeGetString(reference.part_number_record);
                     reference.manufacturing_reference = reader.SafeGetString(reference.manufacturing_reference_record);
+                    reference.order_version = reader.SafeGetInt(reference.order_version_record);
                     reference.program_specification = reader.SafeGetString(reference.program_specification_record);
                     reference.cycle_time = reader.SafeGetInt(reference.cycle_time_record);
                     reference.parts_produced = reader.SafeGetInt(reference.parts_produced_record);
