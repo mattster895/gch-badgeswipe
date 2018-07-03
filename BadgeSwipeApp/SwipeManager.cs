@@ -92,10 +92,10 @@ namespace BadgeSwipeApp
                     {
 
                         // set login to false
-                        
-                        change_login_status(connection, swipeWorker, false);
-                        change_worker_workplace(connection, swipeWorker, false);
+
                         MakeFrame(false, swipeWorker, newWorkplace);
+                        change_worker_workplace(connection, swipeWorker, false);
+                        change_login_status(connection, swipeWorker, false);
                         
                         // // if unique, set workplace worker entry to null
                         if (oldWorkplace.workplace_unique)
@@ -110,9 +110,12 @@ namespace BadgeSwipeApp
                             change_workplace_worker(connection, newWorkplace, true);
                         }
 
-                        change_login_status(connection, swipeWorker, true);
-                        change_worker_workplace(connection, swipeWorker, true);
-
+                        if(worker_logged_in(connection, swipeWorker))
+                        {
+                            change_worker_workplace(connection, swipeWorker, true);
+                            change_login_status(connection, swipeWorker, true);
+                        }
+                        
                         processComplete = true;
                     }
 
@@ -141,7 +144,7 @@ namespace BadgeSwipeApp
                 if (!processComplete)
                 {
                     // if(new cell is not empty and new cell is unique)
-                    if((newWorkplace.active_operator != 0) && (!newWorkplace.workplace_unique))
+                    if((newWorkplace.active_operator != 0) && (newWorkplace.workplace_unique))
                     {
                         Workers oldWorker = new Workers();
                         oldWorker.worker_id = newWorkplace.active_operator;
@@ -452,7 +455,9 @@ namespace BadgeSwipeApp
                     while (reader.Read())
                     {
                         tempID = reader.SafeGetInt(0);
+                        Console.WriteLine(reader.SafeGetInt(0));
                         tempName = reader.SafeGetString(1);
+                        Console.WriteLine(reader.SafeGetString(1));
                     }
                     reader.Close();
                     command.CommandText = @"
@@ -545,7 +550,7 @@ namespace BadgeSwipeApp
                     command.CommandText = @"
                     SELECT TOP 1 worker_id
                     WHERE workplace_id = " + workplace.workplace_id +
-                    "OR workplace_id = " + workplace.sibling_workplace + ");";
+                    " OR workplace_id = " + workplace.sibling_workplace + ";";
                     QC.SqlDataReader reader = command.ExecuteReader();
                     while (reader.Read())
                     {
@@ -557,7 +562,7 @@ namespace BadgeSwipeApp
                     UPDATE Workplaces
                     SET active_operator = " + tempID +
                     "WHERE workplace id = " + workplace.workplace_id +
-                    "OR workplace_id = " + workplace.sibling_workplace + ");";
+                    " OR workplace_id = " + workplace.sibling_workplace + ";";
                     command.ExecuteNonQuery();
 
                     workplace.active_operator = tempID;

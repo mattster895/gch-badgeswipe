@@ -9,18 +9,15 @@ namespace BadgeSwipeApp
         static void Main(string[] args)
         {
             GlobalVar.Debug = false;
+            GlobalVar.StartSwipe = 0;
+            GlobalVar.SwipeNum = 0;
+            GlobalVar.StartRef = 0;
+            GlobalVar.RefNum = 0;
 
             var worker1 = new BackgroundWorker { WorkerReportsProgress = true, WorkerSupportsCancellation = true };
             var worker2 = new BackgroundWorker { WorkerReportsProgress = true, WorkerSupportsCancellation = true };
-
-            GlobalVar.StartSwipe = 0;
-            GlobalVar.SwipeNum = 0;
-
             var worker3 = new BackgroundWorker { WorkerReportsProgress = true, WorkerSupportsCancellation = true };
             var worker4 = new BackgroundWorker { WorkerReportsProgress = true, WorkerSupportsCancellation = true };
-
-            GlobalVar.StartRef = 0;
-            GlobalVar.RefNum = 0;
 
             worker1.DoWork += new DoWorkEventHandler(worker1_DoWork);
             worker1.ProgressChanged += new ProgressChangedEventHandler(worker1_ProgressChanged);
@@ -65,8 +62,6 @@ namespace BadgeSwipeApp
         {
             // Get the Background Worker that raised this event.
             BackgroundWorker worker = sender as BackgroundWorker;
-
-            //Console.WriteLine(e.ProgressPercentage.ToString());
         }
 
         private static void worker1_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
@@ -88,21 +83,15 @@ namespace BadgeSwipeApp
         private static void worker2_DoWork(object sender, DoWorkEventArgs e)
         {
             BackgroundWorker worker = sender as BackgroundWorker;
-
             SwipeManager swipeManager = new SwipeManager();
-
             swipeManager.SwipeAgent(worker, e);
         }
 
         private static void worker2_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
             BackgroundWorker worker = sender as BackgroundWorker;
-
             GlobalVar.StartSwipe += 1;
-            GlobalVar.SwipeNum =  GlobalVar.SwipeNum- 1;
-            //Console.WriteLine("CHANGED " + GlobalVar.StartSwipe);
-            //Console.WriteLine("CHANGED " + GlobalVar.SwipeNum);
-            
+            GlobalVar.SwipeNum =  GlobalVar.SwipeNum- 1;          
         }
 
         private static void worker3_DoWork(object sender, DoWorkEventArgs e)
@@ -138,16 +127,13 @@ namespace BadgeSwipeApp
         private static void worker4_DoWork(object sender, DoWorkEventArgs e)
         {
             BackgroundWorker worker = sender as BackgroundWorker;
-
             RefManager refManager = new RefManager();
-
             refManager.RefAgent(worker, e);
         }
 
         private static void worker4_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
             BackgroundWorker worker = sender as BackgroundWorker;
-
             GlobalVar.StartRef += 1;
             GlobalVar.RefNum = GlobalVar.RefNum - 1;
         }
