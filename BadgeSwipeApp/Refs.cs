@@ -17,7 +17,7 @@ namespace BadgeSwipeApp
         public string manufacturing_reference { get; set; }
         public int manufacturing_reference_record = 2;
 
-        public int order_version { get; set; }
+        public string order_version { get; set; }
         public int order_version_record = 3;
 
         public string program_specification { get; set; }

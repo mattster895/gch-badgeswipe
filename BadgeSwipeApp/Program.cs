@@ -14,19 +14,19 @@ namespace BadgeSwipeApp
             GlobalVar.StartRef = 0;
             GlobalVar.RefNum = 0;
 
-            var worker1 = new BackgroundWorker { WorkerReportsProgress = true, WorkerSupportsCancellation = true };
-            var worker2 = new BackgroundWorker { WorkerReportsProgress = true, WorkerSupportsCancellation = true };
+            //var worker1 = new BackgroundWorker { WorkerReportsProgress = true, WorkerSupportsCancellation = true };
+            //var worker2 = new BackgroundWorker { WorkerReportsProgress = true, WorkerSupportsCancellation = true };
             var worker3 = new BackgroundWorker { WorkerReportsProgress = true, WorkerSupportsCancellation = true };
             var worker4 = new BackgroundWorker { WorkerReportsProgress = true, WorkerSupportsCancellation = true };
 
-            worker1.DoWork += new DoWorkEventHandler(worker1_DoWork);
-            worker1.ProgressChanged += new ProgressChangedEventHandler(worker1_ProgressChanged);
-            worker1.RunWorkerCompleted += new RunWorkerCompletedEventHandler(worker1_RunWorkerCompleted);
-            worker1.RunWorkerAsync();
+            //worker1.DoWork += new DoWorkEventHandler(worker1_DoWork);
+            //worker1.ProgressChanged += new ProgressChangedEventHandler(worker1_ProgressChanged);
+            //worker1.RunWorkerCompleted += new RunWorkerCompletedEventHandler(worker1_RunWorkerCompleted);
+            //worker1.RunWorkerAsync();
 
-            worker2.DoWork += new DoWorkEventHandler(worker2_DoWork);
-            worker2.ProgressChanged += new ProgressChangedEventHandler(worker2_ProgressChanged);
-            worker2.RunWorkerAsync();
+            //worker2.DoWork += new DoWorkEventHandler(worker2_DoWork);
+            //worker2.ProgressChanged += new ProgressChangedEventHandler(worker2_ProgressChanged);
+            //worker2.RunWorkerAsync();
 
             worker3.DoWork += new DoWorkEventHandler(worker3_DoWork);
             worker3.ProgressChanged += new ProgressChangedEventHandler(worker3_ProgressChanged);
@@ -40,8 +40,8 @@ namespace BadgeSwipeApp
             Console.WriteLine("Press any key to cancel the reference worker");
             Console.ReadKey();
 
-            worker1.CancelAsync();
-            worker2.CancelAsync();
+            //worker1.CancelAsync();
+            //worker2.CancelAsync();
             worker3.CancelAsync();
             worker4.CancelAsync();
 

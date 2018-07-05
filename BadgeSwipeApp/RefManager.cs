@@ -141,7 +141,7 @@ namespace BadgeSwipeApp
             // send in frame
             if (status)
             {
-                Frame = "INPM," + Ref.manufacturing_reference.Trim() + "," + Ref.order_version + "," + Workplace.workplace_name.Trim(LaserStringTrim);
+                Frame = "INPM," + Ref.manufacturing_reference.Trim() + "," + Ref.order_version.Trim() + "," + Workplace.workplace_name.Trim(LaserStringTrim);
                 if (Workplace.workplace_name.Trim().EndsWith("A"))
                 {
                     Frame = Frame + ",SIDE A";
@@ -153,7 +153,7 @@ namespace BadgeSwipeApp
             }
             if (!status)
             {
-                Frame = "OUTM," + Ref.manufacturing_reference.Trim() + "," + Ref.order_version + "," + Workplace.workplace_name.Trim(LaserStringTrim);
+                Frame = "OUTM," + Ref.manufacturing_reference.Trim() + "," + Ref.order_version.Trim() + "," + Workplace.workplace_name.Trim(LaserStringTrim);
                 if (Workplace.workplace_name.Trim().EndsWith("A"))
                 {
                     Frame = Frame + ",SIDE A";
@@ -164,7 +164,7 @@ namespace BadgeSwipeApp
                 }
             }
 
-            //send_frame(Frame);
+            send_frame(Frame);
             write_frame(Frame);
                 
         }
@@ -250,7 +250,7 @@ namespace BadgeSwipeApp
                 {
                     reference.part_number = reader.SafeGetString(reference.part_number_record);
                     reference.manufacturing_reference = reader.SafeGetString(reference.manufacturing_reference_record);
-                    reference.order_version = reader.SafeGetInt(reference.order_version_record);
+                    reference.order_version = reader.SafeGetString(reference.order_version_record);
                     reference.program_specification = reader.SafeGetString(reference.program_specification_record);
                     reference.cycle_time = reader.SafeGetInt(reference.cycle_time_record);
                     reference.parts_produced = reader.SafeGetInt(reference.parts_produced_record);
