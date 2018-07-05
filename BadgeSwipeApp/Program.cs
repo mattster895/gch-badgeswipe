@@ -83,10 +83,11 @@ namespace BadgeSwipeApp
         static void launchMenu()
         {
             bool menuComplete = false;
-            Console.WriteLine("Welcome to Captor Frame App for GCH");
+            
 
             while (!menuComplete)
             {
+                Console.WriteLine("Welcome to Captor Frame App for GCH");
                 Console.WriteLine("-----------------------------------");
                 Console.WriteLine("Debug Mode: " + boolFormatter(GlobalVar.Debug));
                 Console.ResetColor();
@@ -97,7 +98,7 @@ namespace BadgeSwipeApp
                 Console.WriteLine("Send Frames: " + boolFormatter(GlobalVar.SendFrames));
                 Console.ResetColor();
                 Console.WriteLine("-----------------------------------");
-                Console.WriteLine("0) Run with these settings.");
+                Console.WriteLine("0) Run with these settings");
                 Console.WriteLine("1) Change Debug Mode");
                 Console.WriteLine("2) Change Badge Swipe Agent");
                 Console.WriteLine("3) Change Ref Scan Agent");
