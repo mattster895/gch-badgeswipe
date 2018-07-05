@@ -217,7 +217,10 @@ namespace BadgeSwipeApp
                     Frame += "," + workplace.sibling_workplace_name.Trim();
                 }
             }
-            send_frame(Frame); // Disabled for testing
+            if (GlobalVar.SendFrames)
+            {
+                send_frame(Frame);
+            }
             write_frame(Frame); 
         }
 

@@ -164,7 +164,10 @@ namespace BadgeSwipeApp
                 }
             }
 
-            send_frame(Frame);
+            if (GlobalVar.SendFrames)
+            {
+                send_frame(Frame);
+            }
             write_frame(Frame);
                 
         }

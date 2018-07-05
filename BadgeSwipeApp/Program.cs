@@ -8,46 +8,144 @@ namespace BadgeSwipeApp
     {
         static void Main(string[] args)
         {
+
+
+
             GlobalVar.Debug = false;
+            GlobalVar.SwipeAgent = false;
+            GlobalVar.RefAgent = false;
+            GlobalVar.SendFrames = false;
+
+            launchMenu();
+
+
             GlobalVar.StartSwipe = 0;
             GlobalVar.SwipeNum = 0;
             GlobalVar.StartRef = 0;
             GlobalVar.RefNum = 0;
-
-            //var worker1 = new BackgroundWorker { WorkerReportsProgress = true, WorkerSupportsCancellation = true };
-            //var worker2 = new BackgroundWorker { WorkerReportsProgress = true, WorkerSupportsCancellation = true };
+            var worker1 = new BackgroundWorker { WorkerReportsProgress = true, WorkerSupportsCancellation = true };
+            var worker2 = new BackgroundWorker { WorkerReportsProgress = true, WorkerSupportsCancellation = true };
             var worker3 = new BackgroundWorker { WorkerReportsProgress = true, WorkerSupportsCancellation = true };
             var worker4 = new BackgroundWorker { WorkerReportsProgress = true, WorkerSupportsCancellation = true };
 
-            //worker1.DoWork += new DoWorkEventHandler(worker1_DoWork);
-            //worker1.ProgressChanged += new ProgressChangedEventHandler(worker1_ProgressChanged);
-            //worker1.RunWorkerCompleted += new RunWorkerCompletedEventHandler(worker1_RunWorkerCompleted);
-            //worker1.RunWorkerAsync();
+            if (GlobalVar.SwipeAgent)
+            {
+                worker1.DoWork += new DoWorkEventHandler(worker1_DoWork);
+                worker1.ProgressChanged += new ProgressChangedEventHandler(worker1_ProgressChanged);
+                worker1.RunWorkerCompleted += new RunWorkerCompletedEventHandler(worker1_RunWorkerCompleted);
+                worker1.RunWorkerAsync();
 
-            //worker2.DoWork += new DoWorkEventHandler(worker2_DoWork);
-            //worker2.ProgressChanged += new ProgressChangedEventHandler(worker2_ProgressChanged);
-            //worker2.RunWorkerAsync();
+                worker2.DoWork += new DoWorkEventHandler(worker2_DoWork);
+                worker2.ProgressChanged += new ProgressChangedEventHandler(worker2_ProgressChanged);
+                worker2.RunWorkerAsync();
+            }
 
-            worker3.DoWork += new DoWorkEventHandler(worker3_DoWork);
-            worker3.ProgressChanged += new ProgressChangedEventHandler(worker3_ProgressChanged);
-            worker3.RunWorkerCompleted += new RunWorkerCompletedEventHandler(worker3_RunWorkerCompleted);
-            worker3.RunWorkerAsync();
+            if (GlobalVar.RefAgent)
+            {
+                worker3.DoWork += new DoWorkEventHandler(worker3_DoWork);
+                worker3.ProgressChanged += new ProgressChangedEventHandler(worker3_ProgressChanged);
+                worker3.RunWorkerCompleted += new RunWorkerCompletedEventHandler(worker3_RunWorkerCompleted);
+                worker3.RunWorkerAsync();
 
-            worker4.DoWork += new DoWorkEventHandler(worker4_DoWork);
-            worker4.ProgressChanged += new ProgressChangedEventHandler(worker4_ProgressChanged);
-            worker4.RunWorkerAsync();
+                worker4.DoWork += new DoWorkEventHandler(worker4_DoWork);
+                worker4.ProgressChanged += new ProgressChangedEventHandler(worker4_ProgressChanged);
+                worker4.RunWorkerAsync();
+            }
 
-            Console.WriteLine("Press any key to cancel the reference worker");
+            Console.WriteLine("Press any key to stop the current operation");
             Console.ReadKey();
 
-            //worker1.CancelAsync();
-            //worker2.CancelAsync();
+        
+            worker1.CancelAsync();
+            worker2.CancelAsync();
             worker3.CancelAsync();
             worker4.CancelAsync();
 
             Console.WriteLine("Press any key to quit");
             Console.ReadKey();
             
+        }
+
+        static string boolFormatter(bool check)
+        {
+            if (check)
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                return "Enabled";
+            }
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                return "Disabled";
+            }
+        }
+
+        static void launchMenu()
+        {
+            bool menuComplete = false;
+            Console.WriteLine("Welcome to Captor Frame App for GCH");
+
+            while (!menuComplete)
+            {
+                Console.WriteLine("-----------------------------------");
+                Console.WriteLine("Debug Mode: " + boolFormatter(GlobalVar.Debug));
+                Console.ResetColor();
+                Console.WriteLine("Badge Swipe Agent: " + boolFormatter(GlobalVar.SwipeAgent));
+                Console.ResetColor();
+                Console.WriteLine("Ref Scan Agent: " + boolFormatter(GlobalVar.RefAgent));
+                Console.ResetColor();
+                Console.WriteLine("Send Frames: " + boolFormatter(GlobalVar.SendFrames));
+                Console.ResetColor();
+                Console.WriteLine("-----------------------------------");
+                Console.WriteLine("0) Run with these settings.");
+                Console.WriteLine("1) Change Debug Mode");
+                Console.WriteLine("2) Change Badge Swipe Agent");
+                Console.WriteLine("3) Change Ref Scan Agent");
+                Console.WriteLine("4) Change Send Frames");
+                Console.WriteLine();
+                char selection = Console.ReadKey().KeyChar;
+                Console.WriteLine();
+                switch (selection)
+                {
+                    case '0':
+                        menuComplete = true;
+                        Console.Clear();
+                        break;
+                    case '1':
+                        if (GlobalVar.Debug)
+                            GlobalVar.Debug = false;
+                        else
+                            GlobalVar.Debug = true;
+                        Console.Clear();
+                        break;
+                    case '2':
+                        if (GlobalVar.SwipeAgent)
+                            GlobalVar.SwipeAgent = false;
+                        else
+                            GlobalVar.SwipeAgent = true;
+                        Console.Clear();
+                        break;
+                    case '3':
+                        if (GlobalVar.RefAgent)
+                            GlobalVar.RefAgent = false;
+                        else
+                            GlobalVar.RefAgent = true;
+                        Console.Clear();
+                        break;
+                    case '4':
+                        if (GlobalVar.SendFrames)
+                            GlobalVar.SendFrames = false;
+                        else
+                            GlobalVar.SendFrames = true;
+                        Console.Clear();
+                        break;
+                    default:
+                        Console.Clear();
+                        Console.WriteLine("Please make a valid selection.");
+                        break;
+
+                }
+            }
         }
 
         private static void worker1_DoWork(object sender, DoWorkEventArgs e)

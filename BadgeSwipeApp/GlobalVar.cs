@@ -13,6 +13,9 @@ namespace BadgeSwipeApp
         static int _StartRef;
         static int _RefNum;
         static bool _Debug;
+        static bool _SwipeAgent;
+        static bool _RefAgent;
+        static bool _SendFrames;
 
         public static int StartSwipe
         {
@@ -71,6 +74,42 @@ namespace BadgeSwipeApp
             set
             {
                 _Debug = value;
+            }
+        }
+
+        public static bool SwipeAgent
+        {
+            get
+            {
+                return _SwipeAgent;
+            }
+            set
+            {
+                _SwipeAgent = value;
+            }
+        }
+
+        public static bool RefAgent
+        {
+            get
+            {
+                return _RefAgent;
+            }
+            set
+            {
+                _RefAgent = value;
+            }
+        }
+        
+        public static bool SendFrames
+        {
+            get
+            {
+                return _SendFrames;
+            }
+            set
+            {
+                _SendFrames = value;
             }
         }
 
