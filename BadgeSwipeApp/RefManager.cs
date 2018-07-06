@@ -71,6 +71,7 @@ namespace BadgeSwipeApp
             FillReference(connection, scanRef);
             FillWorkplace(connection, scanWorkplace);
 
+            // if new input, check if new reference is already scanned into sibling
             
             // If new scanned reference != current reference
             if (scanWorkplace.active_reference != scanRef.reference_number)
@@ -101,7 +102,7 @@ namespace BadgeSwipeApp
                     if (oldRef.reference_number != 0)
                     {
 
-                        change_ref_log(connection, oldRef, scanWorkplace, false);
+                        change_ref_log(connection, oldRef, scanWorkplace, false, false);
                         
                     }
 
@@ -109,7 +110,7 @@ namespace BadgeSwipeApp
                     if(scanRef.reference_number != 0)
                     {
 
-                        change_ref_log(connection, scanRef, scanWorkplace, true);
+                        change_ref_log(connection, scanRef, scanWorkplace, true, false);
 
                     }
                     change_workplace_reference(connection, scanRef, scanWorkplace);
@@ -126,7 +127,7 @@ namespace BadgeSwipeApp
         // These functions generate and/or send the Sisteplant Captor Frames
         // -----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void MakeFrame(bool status, Refs Ref, Workplaces Workplace)
+        public void MakeFrame(bool status, bool doubleStock, Refs Ref, Workplaces Workplace)
         {
             // Input Reference : INPM,Reference,Workplace,Headstock1 | Headstock2 |…..| HeadstockN
             // Output Reference: OUTM,Reference,Workplace,Headstock1 | Headstock2 |…..| HeadstockN
@@ -142,11 +143,15 @@ namespace BadgeSwipeApp
             if (status)
             {
                 Frame = "INPM," + Ref.manufacturing_reference.Trim() + "," + Ref.order_version.Trim() + "," + Workplace.workplace_name.Trim(LaserStringTrim);
-                if (Workplace.workplace_name.Trim().EndsWith("A"))
+                if (doubleStock)
+                {
+                    Frame = Frame + ",SIDE A|SIDE B";
+                }
+                else if (Workplace.workplace_name.Trim().EndsWith("A"))
                 {
                     Frame = Frame + ",SIDE A";
                 }
-                if (Workplace.workplace_name.Trim().EndsWith("B"))
+                else if (Workplace.workplace_name.Trim().EndsWith("B"))
                 {
                     Frame = Frame + ",SIDE B";
                 }
@@ -302,19 +307,44 @@ namespace BadgeSwipeApp
             }
         }
 
-        public void change_ref_log(QC.SqlConnection connection, Refs refs, Workplaces workplace, bool status)
+        public bool sibling_check(QC.SqlConnection connection, Refs refs, Workplaces workplace)
+        {
+            if(workplace.sibling_workplace != 0)
+            {
+                Workplaces sibWorkplace = new Workplaces();
+                sibWorkplace.workplace_id = workplace.sibling_workplace;
+                FillWorkplace(connection, sibWorkplace);
+                if(sibWorkplace.active_reference == refs.reference_number)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public void change_ref_log(QC.SqlConnection connection, Refs refs, Workplaces workplace, bool status, bool pass)
         {
             if (status)
             {
                 int tempHold;
-                
-                MakeFrame(true, refs, workplace);
+
+                // if this ref is currently logged in at the sibling, make a different frame
+                if (pass || sibling_check(connection, refs, workplace))
+                {
+                    MakeFrame(true, true, refs, workplace);
+                    pass = true;
+                }
+                else
+                {
+                    MakeFrame(true, false, refs, workplace);
+                }
                 if (refs.child_reference != 0)
                 {
                     tempHold = refs.reference_number;
                     refs.reference_number = refs.child_reference;
                     FillReference(connection, refs);
-                    change_ref_log(connection, refs, workplace, true);
+                    change_ref_log(connection, refs, workplace, true, pass);
                     refs.reference_number = tempHold;
                     FillReference(connection, refs);
                 }
@@ -323,12 +353,12 @@ namespace BadgeSwipeApp
             if (!status)
             {
                 
-                MakeFrame(false, refs, workplace);
+                MakeFrame(false, false, refs, workplace);
                 if (refs.child_reference != 0)
                 {
                     refs.reference_number = refs.child_reference;
                     FillReference(connection, refs);
-                    change_ref_log(connection, refs, workplace, false);
+                    change_ref_log(connection, refs, workplace, false, false);
                 }
             }
         }
