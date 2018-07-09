@@ -219,6 +219,7 @@ namespace BadgeSwipeApp
 
                 while (reader.Read())
                 {
+                    reference.entry_number = GlobalVar.StartRef;
                     reference.sent_workplace = reader.SafeGetInt(0);
                     reference.sent_ref = reader.SafeGetInt(1);
                     reference.timestamp = reader.GetDateTime(2);
