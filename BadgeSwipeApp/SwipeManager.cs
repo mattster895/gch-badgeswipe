@@ -199,11 +199,12 @@ namespace BadgeSwipeApp
         public void MakeFrame(bool status, Workers worker, Workplaces workplace)
         {
             string Frame = "";
+            char[] LaserStringTrim = { 'A', 'B', ' ' };
             // send in frame (single/double)
             if (status)
             {
-                Frame = "INPW," + worker.worker_id + "," + workplace.workplace_name.Trim();
-                if (workplace.sibling_workplace_name != string.Empty && workplace.sibling_workplace_name != "")
+                Frame = "INPW," + worker.worker_id + "," + workplace.workplace_name.Trim(LaserStringTrim);
+                if (workplace.sibling_workplace_name != string.Empty && workplace.sibling_workplace_name != "" && !workplace.sibling_workplace_name.Contains("LASER"))
                 {
                     Frame += "," + workplace.sibling_workplace_name.Trim();
                 }
@@ -211,8 +212,8 @@ namespace BadgeSwipeApp
             // send out frame (single/double)
             if (!status)
             {
-                Frame = "OUTW," + worker.worker_id + "," + workplace.workplace_name.Trim();
-                if (workplace.sibling_workplace_name != string.Empty && workplace.sibling_workplace_name != "")
+                Frame = "OUTW," + worker.worker_id + "," + workplace.workplace_name.Trim(LaserStringTrim);
+                if (workplace.sibling_workplace_name != string.Empty && workplace.sibling_workplace_name != "" && !workplace.sibling_workplace_name.Contains("LASER"))
                 {
                     Frame += "," + workplace.sibling_workplace_name.Trim();
                 }
@@ -539,7 +540,7 @@ namespace BadgeSwipeApp
                     command.CommandType = DT.CommandType.Text;
                     command.CommandText = @"
                     UPDATE Workplaces
-                    SET active_operator = NULL " +
+                    SET active_operator = 0 " +
                     "WHERE workplace_id = " + workplace.workplace_id +
                     "OR workplace_id = " + workplace.sibling_workplace + ";";
                     command.ExecuteNonQuery();
