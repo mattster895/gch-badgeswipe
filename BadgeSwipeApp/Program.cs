@@ -103,6 +103,7 @@ namespace BadgeSwipeApp
                 Console.WriteLine("2) Change Badge Swipe Agent");
                 Console.WriteLine("3) Change Ref Scan Agent");
                 Console.WriteLine("4) Change Send Frames");
+                Console.WriteLine("5) Refresh Workplaces (BETA)");
                 Console.WriteLine();
                 char selection = Console.ReadKey().KeyChar;
                 Console.WriteLine();
@@ -139,6 +140,11 @@ namespace BadgeSwipeApp
                         else
                             GlobalVar.SendFrames = true;
                         Console.Clear();
+                        break;
+                    case '5':
+                        Console.Clear();
+                        RefreshFromFile refresh = new RefreshFromFile();
+                        refresh.RefreshWorkplace();
                         break;
                     default:
                         Console.Clear();
