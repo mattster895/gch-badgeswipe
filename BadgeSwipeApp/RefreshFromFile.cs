@@ -82,16 +82,46 @@ namespace BadgeSwipeApp
                 }
 
                 // ------------------------------------------------------------------------------------------------------------------------------
-                // Match workplaces to workplace IDs
+                // Do some basic formatting (remove date column, trim order version off of reference)
                 // ------------------------------------------------------------------------------------------------------------------------------
 
-                // Search sql like 'Workplace' + headstock
+                char[] orderVersionTrim = { '-', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
 
+                foreach(DataTable table in queryExport.Tables)
+                {
+                    table.Columns.Remove("LOG IN DATE");
+                    foreach(DataRow row in table.Rows)
+                    {
+                        if(row["HEADSTOCK"].ToString().Contains("SIDE A"))
+                        {
+                            row["Workplace"] += " A";
+                        }
+                        else
+                        {
+                            row["Workplace"] += " B";
+                        }
+
+                        if(row["MANUFACTURING ORDER"].ToString().Equals("WR"))
+                        {
+                            row["MANUFACTURING ORDER"] = "NONE ATTACHED";
+                        }
+                        else
+                        {
+                            row["MANUFACTURING ORDER"] = row["MANUFACTURING ORDER"].ToString().TrimEnd(orderVersionTrim);
+                        }
+                    }
+                    table.Columns.Remove("HEADSTOCK");
+                }
+                
 
                 // ------------------------------------------------------------------------------------------------------------------------------
                 // Match manufacturing orders to references
                 // ------------------------------------------------------------------------------------------------------------------------------
 
+                // Connect to Badge_Swipe_MainDB.Refs
+                // Use data reader to send queries
+
+                // Search sql like 
                 // If no matching reference, delete row
 
                 // ------------------------------------------------------------------------------------------------------------------------------
@@ -99,16 +129,17 @@ namespace BadgeSwipeApp
                 // ------------------------------------------------------------------------------------------------------------------------------
 
                 // For each workplace, 
-                    // If more than one reference,
-                        // for n references
-                            // child check:
-                                // if n has child,
-                                // delete child recursively
+                // If more than one reference,
+                // for n references
+                // child check:
+                // if n has child,
+                // delete child recursively
 
                 // ------------------------------------------------------------------------------------------------------------------------------
                 // Update Badge_Swipe_MainDB.Workplaces 
                 // ------------------------------------------------------------------------------------------------------------------------------
 
+                // confirm 24 entries (for laser)
                 // copy working DataSet to Badge_Swipe_MainDB.Workplaces Laser DataSet
 
                 // ------------------------------------------------------------------------------------------------------------------------------

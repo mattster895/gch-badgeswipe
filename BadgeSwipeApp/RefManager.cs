@@ -184,6 +184,8 @@ namespace BadgeSwipeApp
             IPEndPoint endPoint = new IPEndPoint(captorAddress, 1038);
             byte[] send_buffer = Encoding.UTF8.GetBytes(frame);
             sock.SendTo(send_buffer, endPoint);
+            Thread.Sleep(3000);
+            sock.Close();
         }
 
         public void write_frame(string frame)
