@@ -6,6 +6,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ExcelDataReader;
+using QC = System.Data.SqlClient;
+using DT = System.Data;
+using SQLReaderExtensions;
 using System.IO;
 
 namespace BadgeSwipeApp
@@ -20,6 +23,7 @@ namespace BadgeSwipeApp
 
             string filepath = "workplaces.xlsx";
             DataSet queryExport = new DataSet();
+            List<int> removeList = new List<int>();
 
             using (var stream = File.Open(filepath, FileMode.Open, FileAccess.Read))
             {
@@ -90,7 +94,8 @@ namespace BadgeSwipeApp
                 foreach(DataTable table in queryExport.Tables)
                 {
                     table.Columns.Remove("LOG IN DATE");
-                    foreach(DataRow row in table.Rows)
+                    table.Columns.Add("REFERENCE NUMBER");
+                    foreach (DataRow row in table.Rows)
                     {
                         if(row["HEADSTOCK"].ToString().Contains("SIDE A"))
                         {
@@ -103,7 +108,7 @@ namespace BadgeSwipeApp
 
                         if(row["MANUFACTURING ORDER"].ToString().Equals("WR"))
                         {
-                            row["MANUFACTURING ORDER"] = "NONE ATTACHED";
+                            row["REFERENCE NUMBER"] = 0;
                         }
                         else
                         {
@@ -112,10 +117,10 @@ namespace BadgeSwipeApp
                     }
                     table.Columns.Remove("HEADSTOCK");
                 }
-                
+
 
                 // ------------------------------------------------------------------------------------------------------------------------------
-                // Match manufacturing orders to references
+                // Match references to ref IDs
                 // ------------------------------------------------------------------------------------------------------------------------------
 
                 // Connect to Badge_Swipe_MainDB.Refs
@@ -124,16 +129,67 @@ namespace BadgeSwipeApp
                 // Search sql like 
                 // If no matching reference, delete row
 
-                // ------------------------------------------------------------------------------------------------------------------------------
-                // Collapse child references into parents
-                // ------------------------------------------------------------------------------------------------------------------------------
+                using (var connectionMainDB = new QC.SqlConnection(
+               "Server = 192.168.176.133; " +
+               "Database=Badge_Swipe_MainDB;" +
+               "Trusted_Connection=yes;"))
+                {
+                    connectionMainDB.Open();
+                    using (var command = new QC.SqlCommand())
+                    {
+                        foreach(DataTable table in queryExport.Tables)
+                        {
 
-                // For each workplace, 
-                // If more than one reference,
-                // for n references
-                // child check:
-                // if n has child,
-                // delete child recursively
+                            foreach(DataRow row in table.Rows)
+                            {
+                                if(!row["MANUFACTURING ORDER"].ToString().Equals("WR"))
+                                {
+                                    command.Connection = connectionMainDB;
+                                    command.CommandType = DT.CommandType.Text;
+                                    command.CommandText = @"
+                                    SELECT reference_number
+                                    FROM Refs
+                                    WHERE manufacturing_reference LIKE '%" + row["MANUFACTURING ORDER"] + "%';";
+
+                                    QC.SqlDataReader reader = command.ExecuteReader();
+
+                                    while (reader.Read())
+                                    {
+                                        if (reader.SafeGetInt(0) != 0)
+                                        {
+                                            row["REFERENCE NUMBER"] = reader.SafeGetInt(0);
+                                        }
+                                    }
+                                    reader.Close();
+                                }
+                            }
+
+                            table.Columns.Remove("MANUFACTURING ORDER");
+
+                            for (int i = 0; i < table.Rows.Count; i++)
+                            {
+                                if (table.Rows[i]["REFERENCE NUMBER"].GetType() == typeof(DBNull))
+                                {
+
+                                    removeList.Add(i);
+                                }
+
+                                else if (Convert.ToInt32(table.Rows[i]["REFERENCE NUMBER"]) > 28)
+                                {
+
+                                    removeList.Add(i);
+                                }
+
+                            }
+
+                            foreach(int entry in removeList.Reverse<int>())
+                            {
+                                Console.WriteLine("Remove Row " + entry);
+                                table.Rows.RemoveAt(entry);
+                            }
+                        }
+                    }
+                }
 
                 // ------------------------------------------------------------------------------------------------------------------------------
                 // Update Badge_Swipe_MainDB.Workplaces 
@@ -146,6 +202,7 @@ namespace BadgeSwipeApp
                 // Print for debugging
                 // ------------------------------------------------------------------------------------------------------------------------------
 
+                Console.WriteLine("--------------------------------");
                 foreach (DataTable thisTable in queryExport.Tables)
                 {
                     // For each row, print the values of each column.
