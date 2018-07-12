@@ -184,36 +184,43 @@ namespace BadgeSwipeApp
 
                             foreach(int entry in removeList.Reverse<int>())
                             {
-                                Console.WriteLine("Remove Row " + entry);
                                 table.Rows.RemoveAt(entry);
                             }
                         }
                     }
+                    connectionMainDB.Close();
                 }
 
                 // ------------------------------------------------------------------------------------------------------------------------------
                 // Update Badge_Swipe_MainDB.Workplaces 
                 // ------------------------------------------------------------------------------------------------------------------------------
 
-                // confirm 24 entries (for laser)
                 // copy working DataSet to Badge_Swipe_MainDB.Workplaces Laser DataSet
 
-                // ------------------------------------------------------------------------------------------------------------------------------
-                // Print for debugging
-                // ------------------------------------------------------------------------------------------------------------------------------
-
-                Console.WriteLine("--------------------------------");
-                foreach (DataTable thisTable in queryExport.Tables)
+                using (var connectionMainDB = new QC.SqlConnection(
+                "Server = 192.168.176.133; " +
+                "Database=Badge_Swipe_MainDB;" +
+                "Trusted_Connection=yes;"))
                 {
-                    // For each row, print the values of each column.
-                    foreach (DataRow row in thisTable.Rows)
+                    connectionMainDB.Open();
+                    foreach(DataTable table in queryExport.Tables)
                     {
-                        foreach (DataColumn column in thisTable.Columns)
+                        foreach(DataRow row in table.Rows)
                         {
-                            Console.Write(row[column] + " ");
+                            using (var command = new QC.SqlCommand())
+                            {
+                                command.Connection = connectionMainDB;
+                                command.CommandType = DT.CommandType.Text;
+                                command.CommandText = @"
+                                UPDATE Workplaces
+                                SET active_reference = " + row["REFERENCE NUMBER"] +
+                                " WHERE workplace_name = '" + row["WORKPLACE"] + "';"; 
+
+                                command.ExecuteNonQuery();
+                            }
                         }
-                        Console.WriteLine();
                     }
+                    connectionMainDB.Close();
                 }
             }
         }
