@@ -15,7 +15,11 @@ namespace BadgeSwipeApp
 {
     class RefreshFromFile
     {
-        public void RefreshWorkplace()
+        // Refresh Workplace References - COMPLETE IN LASERS
+        // Refresh Workplace Workers - TO BE IMPLEMENTED
+        // Refresh Reference Details - TO BE IMPLEMENTED
+
+        public void RefreshLaserWorkplace()
         {
             // -------------------------------------------------------------------------------------------------------------------------------------
             // Read in Sisteplant's query export
@@ -224,5 +228,16 @@ namespace BadgeSwipeApp
                 }
             }
         }
+
+        public void RefreshWorkplaceWorkers()
+        {
+            Console.WriteLine("To Be Implemented");
+        }
+
+        public void RefreshReferenceDetails()
+        {
+            Console.WriteLine("To Be Implemented");
+        }
+
     }
 }
