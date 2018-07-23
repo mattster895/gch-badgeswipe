@@ -90,7 +90,7 @@ namespace BadgeSwipeApp
                 }
 
                 // ------------------------------------------------------------------------------------------------------------------------------
-                // Do some basic formatting (remove date column, trim order version off of reference)
+                // Do some basic formatting (remove date column, split manufacturing order and version)
                 // ------------------------------------------------------------------------------------------------------------------------------
 
                 char[] orderVersionTrim = { '-', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
@@ -98,6 +98,7 @@ namespace BadgeSwipeApp
                 foreach(DataTable table in queryExport.Tables)
                 {
                     table.Columns.Remove("LOG IN DATE");
+                    table.Columns.Add("ORDER VERSION");
                     table.Columns.Add("REFERENCE NUMBER");
                     foreach (DataRow row in table.Rows)
                     {
@@ -116,7 +117,17 @@ namespace BadgeSwipeApp
                         }
                         else
                         {
-                            row["MANUFACTURING ORDER"] = row["MANUFACTURING ORDER"].ToString().TrimEnd(orderVersionTrim);
+                            int truncAt = 0;
+                            foreach(char c in row["MANUFACTURING ORDER"].ToString())
+                            {
+                                if(c == '-')
+                                    break;
+                                truncAt++;
+                            }
+                            int cutAt = truncAt + 1;
+
+                            row["ORDER VERSION"] = row["MANUFACTURING ORDER"].ToString().Cut(cutAt);
+                            row["MANUFACTURING ORDER"] = row["MANUFACTURING ORDER"].ToString().Truncate(truncAt);
                         }
                     }
                     table.Columns.Remove("HEADSTOCK");
@@ -148,27 +159,81 @@ namespace BadgeSwipeApp
                             {
                                 if(!row["MANUFACTURING ORDER"].ToString().Equals("WR"))
                                 {
+                                    string mOrder = row["MANUFACTURING ORDER"].ToString();
+                                    string match5 = row["MANUFACTURING ORDER"].ToString().Truncate(5);
+                                    string match4 = row["MANUFACTURING ORDER"].ToString().Truncate(4);
+
+                                    // Match Criteria
+                                    // ---------------------------------------------------------------------------------------
+                                    // First, look for exact match
+                                    // Next, look at the first 5 digits (ghost) - 'Lxxxx' - Ex. L3259A066F matches L32591066F
+                                    // Then, look at the first 4 digits (alt) - 'Lxxx' - Ex. L621TX066F matches L6214D066F
+                                    // Finally, just make a new reference and email someone
+
                                     command.Connection = connectionMainDB;
                                     command.CommandType = DT.CommandType.Text;
                                     command.CommandText = @"
                                     SELECT reference_number
                                     FROM Refs
-                                    WHERE manufacturing_reference LIKE '%" + row["MANUFACTURING ORDER"] + "%';";
+                                    WHERE manufacturing_reference LIKE '" + mOrder + "';"; // Exact match
 
                                     QC.SqlDataReader reader = command.ExecuteReader();
 
-                                    while (reader.Read())
+                                    if (reader.Read())
                                     {
                                         if (reader.SafeGetInt(0) != 0)
                                         {
                                             row["REFERENCE NUMBER"] = reader.SafeGetInt(0);
                                         }
+                                        reader.Close();
                                     }
-                                    reader.Close();
+                                    else
+                                    {
+                                        reader.Close();
+                                        command.CommandText = @"
+                                        SELECT reference_number
+                                        FROM Refs
+                                        WHERE manufacturing_reference LIKE '" + match5 + "%';"; // Ghost Match
+                                        reader = command.ExecuteReader();
+
+                                        if (reader.Read())
+                                        {
+                                            Console.WriteLine("Ghost Match - " + mOrder);
+                                            reader.Close();
+                                        }
+                                        else
+                                        {
+                                            reader.Close();
+                                            command.CommandText = @"
+                                            SELECT reference_number
+                                            FROM Refs
+                                            WHERE manufacturing_reference LIKE '" + match4 + "%';"; // Alt Match
+                                            reader = command.ExecuteReader();
+
+                                            if (reader.Read())
+                                            {
+                                                Console.WriteLine("Alt Match - " + mOrder);
+                                            }
+                                            else
+                                            {
+                                                Console.WriteLine("No Match - " + mOrder);
+                                                // Add new entry
+                                                    // Reference Number - Auto
+                                                    // Part Number - Manual
+                                                    // Manufacturing Reference - Saved
+                                                    // Order Version - Saved
+                                                    // Program Specification - Manual
+                                                    // Cycle Time - Manual
+                                                    // Parts Produced - Manual
+                                                    // Child Reference - Calculate
+                                            }
+                                            reader.Close();
+                                        }
+                                    }
                                 }
                             }
 
-                            table.Columns.Remove("MANUFACTURING ORDER");
+                            //table.Columns.Remove("MANUFACTURING ORDER");
 
                             for (int i = 0; i < table.Rows.Count; i++)
                             {
@@ -225,6 +290,18 @@ namespace BadgeSwipeApp
                         }
                     }
                     connectionMainDB.Close();
+                }
+
+                foreach (DataTable table in queryExport.Tables)
+                {
+                    foreach (DataRow row in table.Rows)
+                    {
+                        foreach (DataColumn column in table.Columns)
+                        {
+                            Console.Write(row[column] + "  ");
+                        }
+                        Console.WriteLine();
+                    }
                 }
             }
         }

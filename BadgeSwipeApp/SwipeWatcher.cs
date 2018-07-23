@@ -24,8 +24,6 @@ namespace BadgeSwipeApp
             
             using (tableDependency)
             {
-
-                
                 tableDependency.OnChanged += TableDependency_Changed;
                 tableDependency.OnError += TableDependency_OnError;
                 tableDependency.Start();

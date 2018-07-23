@@ -21,13 +21,25 @@ namespace SQLReaderExtensions
             return string.Empty;
         }
 
-
-
         public static int SafeGetInt(this SqlDataReader reader, int colIndex)
         {
             if (!reader.IsDBNull(colIndex))
                 return reader.GetInt32(colIndex);
             return 0;
+        }
+    }
+
+    public static class StringExt
+    {
+        public static string Truncate(this string value, int maxLength)
+        {
+            if (string.IsNullOrEmpty(value)) return value;
+            return value.Length <= maxLength ? value : value.Substring(0, maxLength);
+        }
+        public static string Cut(this string value, int cut)
+        {
+            if (string.IsNullOrEmpty(value)) return value;
+            return value.Substring(cut, value.Count()-cut);
         }
     }
 }
