@@ -9,10 +9,10 @@ using QC = System.Data.SqlClient;
 
 
 
-namespace SQLReaderExtensions
+namespace MyExtensions
 {
     // Extension methods must be deined in a static class
-    public static class MyExtensions
+    public static class SQLReaderExtensions
     {
         public static string SafeGetString(this SqlDataReader reader, int colIndex)
         {
@@ -29,7 +29,7 @@ namespace SQLReaderExtensions
         }
     }
 
-    public static class StringExt
+    public static class StringExtensions
     {
         public static string Truncate(this string value, int maxLength)
         {

@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using DT = System.Data;
 using QC = System.Data.SqlClient;
-using SQLReaderExtensions;
+using MyExtensions;
 using System.Threading;
 using System.Net;
 using System.Net.Sockets;
@@ -74,7 +74,7 @@ namespace BadgeSwipeApp
             // if new input, check if new reference is already scanned into sibling
             
             // If new scanned reference != current reference
-            if (scanWorkplace.active_reference != scanRef.reference_number)
+            if (scanWorkplace.workplace_ref && (scanWorkplace.active_reference != scanRef.reference_number))
             {
                 //Save details of reference already in that workplace
                 Refs oldRef = new Refs();
@@ -276,7 +276,7 @@ namespace BadgeSwipeApp
             //Console.WriteLine("Reference Number = " + reference.reference_number);
             //Console.WriteLine("Part Number = " + reference.part_number);
             //Console.WriteLine("Manufacturing Reference = " + reference.manufacturing_reference);
-            //Console.WriteLine("Program Specification = " + reference.program_specification);
+            //Console.WriteLine("Program Specification = " + reference.workplace_program_specification);
             //Console.WriteLine("Cycle Time = " + reference.cycle_time);
             //Console.WriteLine("Parts Produced = " + reference.parts_produced);
             //Console.WriteLine("Workplace ID = " + reference.workplace_id);
@@ -305,6 +305,9 @@ namespace BadgeSwipeApp
                     workplace.sibling_workplace_name = reader.SafeGetString(workplace.sibling_workplace_name_record);
                     workplace.workplace_unique = reader.GetBoolean(workplace.workplace_unique_record);
                     workplace.workplace_exclusive = reader.GetBoolean(workplace.workplace_exclusive_record);
+                    workplace.workplace_badge = reader.GetBoolean(workplace.workplace_badge_record);
+                    workplace.workplace_ref = reader.GetBoolean(workplace.workplace_ref_record);
+                    workplace.workplace_program_specification = reader.SafeGetString(workplace.workplace_program_specification_record);
                 }
                 reader.Close();
             }

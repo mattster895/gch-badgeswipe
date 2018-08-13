@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using DT = System.Data;
 using QC = System.Data.SqlClient;
-using SQLReaderExtensions;
+using MyExtensions;
 using System.Threading;
 using System.Net;
 using System.Net.Sockets;
@@ -81,11 +81,11 @@ namespace BadgeSwipeApp
             }
             
             // If the worker is authorized to log in/log out of cells
-            if (swipeWorker.worker_id != 0 && swipeWorker.worker_clearance != 0)
+            if (newWorkplace.workplace_badge && (swipeWorker.worker_id != 0) && (swipeWorker.worker_clearance != 0))
             {
                 // Log out of old cells if necessary
                 
-                if(swipeWorker.login_status == true && swipeWorker.workplace_id == 0)
+                if(swipeWorker.login_status && swipeWorker.workplace_id == 0)
                 {
                     change_login_status(connection, swipeWorker, false);
                 }
@@ -602,6 +602,9 @@ namespace BadgeSwipeApp
                     workplace.sibling_workplace_name = reader.SafeGetString(workplace.sibling_workplace_name_record);
                     workplace.workplace_unique = reader.GetBoolean(workplace.workplace_unique_record);
                     workplace.workplace_exclusive = reader.GetBoolean(workplace.workplace_exclusive_record);
+                    workplace.workplace_badge = reader.GetBoolean(workplace.workplace_badge_record);
+                    workplace.workplace_ref = reader.GetBoolean(workplace.workplace_ref_record);
+                    workplace.workplace_program_specification = reader.SafeGetString(workplace.workplace_program_specification_record);
                 }
                 reader.Close();
             }
