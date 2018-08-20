@@ -234,6 +234,7 @@ namespace BadgeSwipeApp
                                     if (reader.Read())
                                     {
                                         Console.WriteLine("Ghost Match - " + mOrder);
+                                        Console.WriteLine("Logging in Reference # " + reader.SafeGetInt(0));
                                         row["REFERENCE NUMBER"] = reader.SafeGetInt(0);
                                         reader.Close();
                                     }
@@ -249,6 +250,7 @@ namespace BadgeSwipeApp
                                         if (reader.Read())
                                         {
                                             Console.WriteLine("Alt Match - " + mOrder);
+                                            Console.WriteLine("Logging in Reference # " + reader.SafeGetInt(0));
                                             row["REFERENCE NUMBER"] = reader.SafeGetInt(0);
                                             reader.Close();
                                         }
@@ -277,7 +279,7 @@ namespace BadgeSwipeApp
                                 removeList.Add(i);
                             }
 
-                            else if (Convert.ToInt32(table.Rows[i]["REFERENCE NUMBER"]) > 28)
+                            else if (Convert.ToInt32(table.Rows[i]["REFERENCE NUMBER"]) > 29)
                             {
 
                                 removeList.Add(i);

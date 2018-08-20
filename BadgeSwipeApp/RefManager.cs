@@ -41,9 +41,7 @@ namespace BadgeSwipeApp
                     while (GlobalVar.RefNum > 0)
                     {
                         getEntry(connectionEntryDB, currentRef);
-
                         currentRef.debugPrint(GlobalVar.Debug);
-
                         RefProcess(connectionMainDB, currentRef);
                         worker.ReportProgress(0);
                         Thread.Sleep(100);
@@ -71,55 +69,55 @@ namespace BadgeSwipeApp
             FillReference(connection, scanRef);
             FillWorkplace(connection, scanWorkplace);
 
-            // if new input, check if new reference is already scanned into sibling
-            
-            // If new scanned reference != current reference
-            if (scanWorkplace.workplace_ref && (scanWorkplace.active_reference != scanRef.reference_number))
+            // First, check that this is a workplace that accepts reference scans
+            if (scanWorkplace.workplace_ref)
             {
-                //Save details of reference already in that workplace
-                Refs oldRef = new Refs();
-                oldRef.reference_number = scanWorkplace.active_reference;
-                FillReference(connection, oldRef);
+                // if new input, check if new reference is already scanned into sibling
 
-             
+                // If new scanned reference != current reference
 
-                if (scanRef.reference_number == 0)
+                // Else, do nothing
+                if (scanWorkplace.active_reference != scanRef.reference_number)
                 {
-                    // Check for "Repair Job"
-                    if (repair)
-                    {
-                        // Do something if Repair Job exists
-                        process_complete = true;
-                    }
-                        
-                        
-                    // Otherwise, continue as normal
-                }
+                    //Save details of reference already in that workplace
+                    Refs oldRef = new Refs();
+                    oldRef.reference_number = scanWorkplace.active_reference;
+                    FillReference(connection, oldRef);
 
-                if (!process_complete)
-                {
-                    // Log out current reference
-                    if (oldRef.reference_number != 0)
+                    if (scanRef.reference_number == 0)
                     {
+                        // Check for "Repair Job"
+                        if (repair)
+                        {
+                            // Do something if Repair Job exists
+                            process_complete = true;
+                        }
 
-                        change_ref_log(connection, oldRef, scanWorkplace, false, false);
-                        
+
+                        // Otherwise, continue as normal
                     }
 
-                    // Log in new reference
-                    if(scanRef.reference_number != 0)
+                    if (!process_complete)
                     {
+                        // Log out current reference
+                        if (oldRef.reference_number != 0)
+                        {
 
-                        change_ref_log(connection, scanRef, scanWorkplace, true, false);
+                            change_ref_log(connection, oldRef, scanWorkplace, false, false);
 
+                        }
+
+                        // Log in new reference
+                        if (scanRef.reference_number != 0)
+                        {
+
+                            change_ref_log(connection, scanRef, scanWorkplace, true, false);
+
+                        }
+                        change_workplace_reference(connection, scanRef, scanWorkplace);
                     }
-                    change_workplace_reference(connection, scanRef, scanWorkplace);
                 }
             }
-
-
-            // Else, do nothing
-
         }
 
         // -----------------------------------------------------------------------------------------------------------------------------------------------------

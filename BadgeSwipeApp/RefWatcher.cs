@@ -31,7 +31,6 @@ namespace BadgeSwipeApp
                 {
 
                 }
-
                 tableDependency.Stop();
 
             }

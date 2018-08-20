@@ -79,114 +79,118 @@ namespace BadgeSwipeApp
             {
                 add_new_worker(connection, swipeWorker);
             }
-            
-            // If the worker is authorized to log in/log out of cells
-            if (newWorkplace.workplace_badge && (swipeWorker.worker_id != 0) && (swipeWorker.worker_clearance != 0))
+
+            // first, check that this workplace accepts badge scans
+            if (newWorkplace.workplace_badge)
             {
-                // Log out of old cells if necessary
-                
-                if(swipeWorker.login_status && swipeWorker.workplace_id == 0)
+                // If the worker is authorized to log in/log out of cells
+                if ((swipeWorker.worker_id != 0) && (swipeWorker.worker_clearance != 0))
                 {
-                    change_login_status(connection, swipeWorker, false);
-                }
+                    // Log out of old cells if necessary
 
-                if(swipeWorker.login_status)
-                {
+                    if (swipeWorker.login_status && swipeWorker.workplace_id == 0)
+                    {
+                        change_login_status(connection, swipeWorker, false);
+                    }
 
-                    // Are they badging out?
-                    if (query_logout(connection, swipeWorker, newWorkplace))
+                    if (swipeWorker.login_status)
                     {
 
-                        // set login to false
-
-                        MakeFrame(false, swipeWorker, newWorkplace);
-                        change_worker_workplace(connection, swipeWorker, false);
-                        change_login_status(connection, swipeWorker, false);
-                        
-                        // // if unique, set workplace worker entry to null
-                        if (oldWorkplace.workplace_unique)
+                        // Are they badging out?
+                        if (query_logout(connection, swipeWorker, newWorkplace))
                         {
+
+                            // set login to false
+
+                            MakeFrame(false, swipeWorker, newWorkplace);
+                            change_worker_workplace(connection, swipeWorker, false);
+                            change_login_status(connection, swipeWorker, false);
+
+                            // // if unique, set workplace worker entry to null
+                            if (oldWorkplace.workplace_unique)
+                            {
+                                change_workplace_worker(connection, newWorkplace, false);
+                            }
+
+                            // // else, set workplace worker entry to first person still logged into this cell
+                            else
+                            {
+                                // SQL to return where login = true and activeWorkplace.workplace_id = old/newWorkplace.workplace_id
+                                change_workplace_worker(connection, newWorkplace, true);
+                            }
+
+                            if (worker_logged_in(connection, swipeWorker))
+                            {
+                                change_worker_workplace(connection, swipeWorker, true);
+                                change_login_status(connection, swipeWorker, true);
+                            }
+
+                            processComplete = true;
+                        }
+
+                        // Is the worker's old cell exclusive,
+                        // or the worker's new cell exclusive (?)
+                        // log them out of the old cell
+                        else if (oldWorkplace.workplace_exclusive || newWorkplace.workplace_exclusive)
+                        {
+                            change_login_status(connection, swipeWorker, false);
+                            change_worker_workplace(connection, swipeWorker, false);
+                            MakeFrame(false, swipeWorker, oldWorkplace);
+
+                            if (oldWorkplace.workplace_unique)
+                            {
+                                change_workplace_worker(connection, oldWorkplace, false);
+                            }
+                            else
+                            {
+                                change_workplace_worker(connection, oldWorkplace, true);
+                            }
+
+                        }
+                    }
+
+                    // Log into a new cell
+                    if (!processComplete)
+                    {
+                        // if(new cell is not empty and new cell is unique)
+                        if ((newWorkplace.active_operator != 0) && (newWorkplace.workplace_unique))
+                        {
+                            Workers oldWorker = new Workers();
+                            oldWorker.worker_id = newWorkplace.active_operator;
+                            FillWorker(connection, oldWorker);
+
+                            // log out old operator in new cell
+                            change_login_status(connection, oldWorker, false);
+
+                            // change workplace operator to NULL
                             change_workplace_worker(connection, newWorkplace, false);
+
+                            // if the worker is logged in nowhere else,
+                            if (!worker_logged_in(connection, oldWorker))
+                            {
+                                // change their workplace to NULL
+                                change_worker_workplace(connection, oldWorker, false);
+                            }
+                            else
+                            {
+                                // change their workplace to the first place they're logged in
+                                change_worker_workplace(connection, oldWorker, true);
+                                change_login_status(connection, oldWorker, true);
+                            }
+
+                            // Send logout frame
+                            MakeFrame(false, oldWorker, newWorkplace);
                         }
 
-                        // // else, set workplace worker entry to first person still logged into this cell
-                        else
+                        // log in new operator in new cell
                         {
-                            // SQL to return where login = true and activeWorkplace.workplace_id = old/newWorkplace.workplace_id
-                            change_workplace_worker(connection, newWorkplace, true);
-                        }
-
-                        if(worker_logged_in(connection, swipeWorker))
-                        {
-                            change_worker_workplace(connection, swipeWorker, true);
                             change_login_status(connection, swipeWorker, true);
+                            change_workplace_worker(connection, newWorkplace, swipeWorker);
+                            change_worker_workplace(connection, swipeWorker, newWorkplace);
+                            MakeFrame(true, swipeWorker, newWorkplace);
                         }
-                        
-                        processComplete = true;
-                    }
-
-                    // Is the worker's old cell exclusive,
-                    // or the worker's new cell exclusive (?)
-                    // log them out of the old cell
-                    else if (oldWorkplace.workplace_exclusive || newWorkplace.workplace_exclusive)
-                    {
-                        change_login_status(connection, swipeWorker, false);
-                        change_worker_workplace(connection, swipeWorker, false);
-                        MakeFrame(false, swipeWorker, oldWorkplace);
-
-                        if (oldWorkplace.workplace_unique)
-                        {
-                            change_workplace_worker(connection, oldWorkplace, false);
-                        }
-                        else
-                        {
-                            change_workplace_worker(connection, oldWorkplace, true);
-                        }
-
                     }
                 }
-
-                // Log into a new cell
-                if (!processComplete)
-                {
-                    // if(new cell is not empty and new cell is unique)
-                    if((newWorkplace.active_operator != 0) && (newWorkplace.workplace_unique))
-                    {
-                        Workers oldWorker = new Workers();
-                        oldWorker.worker_id = newWorkplace.active_operator;
-                        FillWorker(connection, oldWorker);
-                        
-                        // log out old operator in new cell
-                        change_login_status(connection, oldWorker, false);
-                        
-                        // change workplace operator to NULL
-                        change_workplace_worker(connection, newWorkplace, false);
-
-                        // if the worker is logged in nowhere else,
-                        if (!worker_logged_in(connection, oldWorker))
-                        {
-                            // change their workplace to NULL
-                            change_worker_workplace(connection, oldWorker, false);
-                        }
-                        else
-                        {
-                            // change their workplace to the first place they're logged in
-                            change_worker_workplace(connection, oldWorker, true);
-                            change_login_status(connection, oldWorker, true);
-                        }
-                        
-                        // Send logout frame
-                        MakeFrame(false, oldWorker, newWorkplace);
-                    }
-
-                    // log in new operator in new cell
-                    {
-                        change_login_status(connection, swipeWorker, true);
-                        change_workplace_worker(connection, newWorkplace, swipeWorker);
-                        change_worker_workplace(connection, swipeWorker, newWorkplace);
-                        MakeFrame(true, swipeWorker, newWorkplace);
-                    }
-                }           
             }
         }
 
