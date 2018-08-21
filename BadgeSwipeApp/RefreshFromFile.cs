@@ -103,6 +103,7 @@ namespace BadgeSwipeApp
 
                     if (reader.Read())
                     {
+                        reader.Close();
                         return true;
                     }
                     else
@@ -188,6 +189,7 @@ namespace BadgeSwipeApp
                 // Add two new columns for reference number and order version (split from manufacturing order)
                 table.Columns.Add("ORDER VERSION");
                 table.Columns.Add("REFERENCE NUMBER");
+                table.Columns.Add("REFERENCE VERSION");
 
                 foreach (DataRow row in table.Rows)
                 {
@@ -205,6 +207,7 @@ namespace BadgeSwipeApp
                     if (row["MANUFACTURING ORDER"].ToString().Equals("WR"))
                     {
                         row["REFERENCE NUMBER"] = 0;
+                        row["REFERENCE VERSION"] = 0;
                     }
 
                     else
@@ -275,6 +278,7 @@ namespace BadgeSwipeApp
                                     if (reader.SafeGetInt(0) != 0)
                                     {
                                         row["REFERENCE NUMBER"] = reader.SafeGetInt(0);
+                                        row["REFERENCE VERSION"] = 0;
                                     }
                                     reader.Close();
                                 }
@@ -312,13 +316,28 @@ namespace BadgeSwipeApp
                                             if (reader.Read())
                                             {
                                                 addAltRefs(tempRef, reader.SafeGetInt(0)+1, false, true, mOrder);
+                                                row["REFERENCE VERSION"] = reader.SafeGetInt(0) + 1;
                                                 reader.Close();
                                             }
                                             else
                                             {
                                                 addAltRefs(tempRef, 1, false, true, mOrder);
                                                 reader.Close();
+                                                row["REFERENCE VERSION"] = 1;
                                             }
+                                        }
+                                        else
+                                        {
+                                            command.CommandText = @"
+                                                SELECT alt_version
+                                                FROM AltRefs
+                                                WHERE alt_order LIKE '" + mOrder + "';";
+                                            reader = command.ExecuteReader();
+                                            while (reader.Read())
+                                            {
+                                                row["REFERENCE VERSION"] = reader.SafeGetInt(0);
+                                            }
+                                            reader.Close();
                                         }
                                     }
                                     else
@@ -353,13 +372,29 @@ namespace BadgeSwipeApp
                                                 if (reader.Read())
                                                 {
                                                     addAltRefs(tempRef, reader.SafeGetInt(0) + 1, true, false, mOrder);
+                                                    row["REFERENCE VERSION"] = reader.SafeGetInt(0) + 1;
                                                     reader.Close();
                                                 }
                                                 else
                                                 {
                                                     addAltRefs(tempRef, 1, true, false, mOrder);
                                                     reader.Close();
+                                                    row["REFERENCE VERSION"] = 1;
                                                 }
+                                            }
+                                            else
+                                            {
+
+                                                command.CommandText = @"
+                                                SELECT alt_version
+                                                FROM AltRefs
+                                                WHERE alt_order LIKE '" + mOrder + "';";
+                                                reader = command.ExecuteReader();
+                                                while (reader.Read())
+                                                {
+                                                    row["REFERENCE VERSION"] = reader.SafeGetInt(0);
+                                                }
+                                                reader.Close();
                                             }
                                         }
                                         else
@@ -422,7 +457,8 @@ namespace BadgeSwipeApp
                             command.CommandText = @"
                                 UPDATE Workplaces
                                 SET active_reference = " + row["REFERENCE NUMBER"] +
-                            " WHERE workplace_name = '" + row["WORKPLACE"] + "';";
+                                ", active_reference_version = " + row["REFERENCE VERSION"] +
+                                " WHERE workplace_name = '" + row["WORKPLACE"] + "';";
 
                             command.ExecuteNonQuery();
                         }
