@@ -84,6 +84,62 @@ namespace BadgeSwipeApp
             }
         }
 
+        public bool altRefCheck(string alt_order)
+        {
+            using (var connectionMainDBCheck = new QC.SqlConnection(
+                "Server = 192.168.176.133; " +
+                "Database=Badge_Swipe_MainDB; " +
+                "Trusted_Connection=yes;"))
+            {
+                connectionMainDBCheck.Open();
+                using (var command = new QC.SqlCommand())
+                {
+                    command.Connection = connectionMainDBCheck;
+                    command.CommandType = DT.CommandType.Text;
+                    command.CommandType = DT.CommandType.Text;
+                    command.CommandText = @"
+                    SELECT * FROM AltRefs WHERE alt_order LIKE '" + alt_order + "';";
+                    QC.SqlDataReader reader = command.ExecuteReader();
+
+                    if (reader.Read())
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        reader.Close();
+                        return false;
+                    }
+
+                }
+            }
+        }
+
+        public void addAltRefs(int standard_ref, int alt_version, bool alt_ref, bool ghost_ref, string alt_order)
+        {
+            using (var connectionMainDBAdd = new QC.SqlConnection(
+                "Server = 192.168.176.133; " +
+                "Database=Badge_Swipe_MainDB; " +
+                "Trusted_Connection=yes;"))
+            {
+                connectionMainDBAdd.Open();
+                using (var command = new QC.SqlCommand())
+                {
+                    command.Connection = connectionMainDBAdd;
+                    command.CommandType = DT.CommandType.Text;
+                    command.CommandText = @"
+                    INSERT INTO AltRefs(standard_ref, alt_version, alt_ref, ghost_ref, alt_order) VALUES('" +
+                    standard_ref + "', '" +
+                    alt_version + "', '" +
+                    alt_ref + "', '" +
+                    ghost_ref + "', '" +
+                    alt_order + "');";
+                    command.ExecuteNonQuery();
+                }
+                connectionMainDBAdd.Close();
+            }
+        }
+
         public void RefreshLaserWorkplace()
         {
             // Declare variables
@@ -236,7 +292,34 @@ namespace BadgeSwipeApp
                                         Console.WriteLine("Ghost Match - " + mOrder);
                                         Console.WriteLine("Logging in Reference # " + reader.SafeGetInt(0));
                                         row["REFERENCE NUMBER"] = reader.SafeGetInt(0);
+                                        int tempRef = reader.SafeGetInt(0);
                                         reader.Close();
+
+                                        // check for entry in the AltRefs table
+
+                                        if (!altRefCheck(mOrder))
+                                        {
+                                            // add new entry into AltRefs table
+                                            // add standard ref, add the manufacturing order, mark as a ghost
+
+                                            command.CommandText = @"
+                                        SELECT alt_version
+                                        FROM AltRefs
+                                        WHERE standard_ref = " + tempRef +
+                                            " ORDER BY alt_version DESC;";
+                                            reader = command.ExecuteReader();
+
+                                            if (reader.Read())
+                                            {
+                                                addAltRefs(tempRef, reader.SafeGetInt(0)+1, false, true, mOrder);
+                                                reader.Close();
+                                            }
+                                            else
+                                            {
+                                                addAltRefs(tempRef, 1, false, true, mOrder);
+                                                reader.Close();
+                                            }
+                                        }
                                     }
                                     else
                                     {
@@ -252,13 +335,37 @@ namespace BadgeSwipeApp
                                             Console.WriteLine("Alt Match - " + mOrder);
                                             Console.WriteLine("Logging in Reference # " + reader.SafeGetInt(0));
                                             row["REFERENCE NUMBER"] = reader.SafeGetInt(0);
+                                            int tempRef = reader.SafeGetInt(0);
                                             reader.Close();
+
+                                            if (!altRefCheck(mOrder))
+                                            {
+                                                // add new entry into AltRefs table
+                                                // add standard ref, add the manufacturing order, mark as a ghost
+
+                                                command.CommandText = @"
+                                                SELECT alt_version
+                                                FROM AltRefs
+                                                WHERE standard_ref = " + tempRef +
+                                                " ORDER BY alt_version DESC;";
+                                                reader = command.ExecuteReader();
+
+                                                if (reader.Read())
+                                                {
+                                                    addAltRefs(tempRef, reader.SafeGetInt(0) + 1, true, false, mOrder);
+                                                    reader.Close();
+                                                }
+                                                else
+                                                {
+                                                    addAltRefs(tempRef, 1, true, false, mOrder);
+                                                    reader.Close();
+                                                }
+                                            }
                                         }
                                         else
                                         {
                                             Console.WriteLine("No Match - " + mOrder);
                                             Console.WriteLine("Adding new entry");
-
                                             // Add new entry to table
                                             addList.Add(table.Rows.IndexOf(row));
                                             reader.Close();
