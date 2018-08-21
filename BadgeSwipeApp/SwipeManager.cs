@@ -586,6 +586,8 @@ namespace BadgeSwipeApp
             }
         }
         
+
+        // This should probably be a method of the workplace model? I'm not sure. Look into this!
         public void FillWorkplace(QC.SqlConnection connection, Workplaces workplace)
         {
             using (var command = new QC.SqlCommand())
@@ -602,6 +604,7 @@ namespace BadgeSwipeApp
                     workplace.workplace_name = reader.SafeGetString(workplace.workplace_name_record);
                     workplace.active_operator = reader.SafeGetInt(workplace.active_operator_record);
                     workplace.active_reference = reader.SafeGetInt(workplace.active_reference_record);
+                    workplace.active_reference_version = reader.SafeGetInt(workplace.active_reference_version_record);
                     workplace.sibling_workplace = reader.SafeGetInt(workplace.sibling_workplace_record);
                     workplace.sibling_workplace_name = reader.SafeGetString(workplace.sibling_workplace_name_record);
                     workplace.workplace_unique = reader.GetBoolean(workplace.workplace_unique_record);

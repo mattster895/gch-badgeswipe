@@ -20,26 +20,29 @@ namespace BadgeSwipeApp
         public int active_reference { get; set; }
         public int active_reference_record = 3;
 
+        public int active_reference_version { get; set; }
+        public int active_reference_version_record = 4;
+
         public int sibling_workplace { get; set; }
-        public int sibling_workplace_record = 4;
+        public int sibling_workplace_record = 5;
 
         public string sibling_workplace_name { get; set; }
-        public int sibling_workplace_name_record = 5;
+        public int sibling_workplace_name_record = 6;
 
         public bool workplace_unique { get; set; }
-        public int workplace_unique_record = 6;
+        public int workplace_unique_record = 7;
 
         public bool workplace_exclusive { get; set; }
-        public int workplace_exclusive_record = 7;
+        public int workplace_exclusive_record = 8;
 
         public bool workplace_badge { get; set; }
-        public int workplace_badge_record = 8;
+        public int workplace_badge_record = 9;
 
         public bool workplace_ref { get; set; }
-        public int workplace_ref_record = 9;
+        public int workplace_ref_record = 10;
 
         public string workplace_program_specification { get; set; }
-        public int workplace_program_specification_record = 10;
+        public int workplace_program_specification_record = 11;
 
         public void debugPrint(bool debug)
         {
@@ -53,6 +56,7 @@ namespace BadgeSwipeApp
                 Console.WriteLine("Workplace Program Specification - " + workplace_program_specification);
                 Console.WriteLine("Active Operator - " + active_operator);
                 Console.WriteLine("Active Reference - " + active_reference);
+                Console.WriteLine("Active Reference Version - " + active_reference_version);
                 Console.WriteLine("Sibling Workplace ID - " + sibling_workplace);
                 Console.WriteLine("Sibling Workplace Name - " + sibling_workplace_name);
                 Console.WriteLine("Workplace Unique - " + workplace_unique);
