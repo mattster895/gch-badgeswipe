@@ -27,15 +27,15 @@ namespace BadgeSwipeApp
                 "Server = 192.168.176.133; " +
                 "Database=Badge_Swipe_MainDB;" +
                 "Trusted_Connection=yes;"))
-                using (var connectionEntryDB = new QC.SqlConnection(
-                    "Server = 192.168.176.133; " +
-                    "Database=Badge_Swipe_EntryDB;" +
-                    "Trusted_Connection=yes;"))
+            using (var connectionEntryDB = new QC.SqlConnection(
+                "Server = 192.168.176.133; " +
+                "Database=Badge_Swipe_EntryDB;" +
+                "Trusted_Connection=yes;"))
             {
                 connectionMainDB.Open();
                 connectionEntryDB.Open();
                 Console.WriteLine("Reference Scan App is up and running");
-                
+
                 while (!worker.CancellationPending)
                 {
                     while (GlobalVar.RefNum > 0)
@@ -83,6 +83,11 @@ namespace BadgeSwipeApp
                     Refs oldRef = new Refs();
                     oldRef.reference_number = scanWorkplace.active_reference;
                     FillReference(connection, oldRef);
+
+                    if (scanWorkplace.active_reference_version != 0)
+                    {
+                        adjustAltReference(connection, oldRef, scanWorkplace.active_reference_version);
+                    }
 
                     if (scanRef.reference_number == 0)
                     {
@@ -172,7 +177,7 @@ namespace BadgeSwipeApp
                 send_frame(Frame);
             }
             write_frame(Frame);
-                
+
         }
 
         public void send_frame(string frame)
@@ -194,7 +199,7 @@ namespace BadgeSwipeApp
                 sw.WriteLine("(" + DateTime.Now.ToString("s") + "):\t" + frame);
                 sw.Close();
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Console.WriteLine("Exception: " + e.Message);
             }
@@ -268,6 +273,7 @@ namespace BadgeSwipeApp
                 reader.Close();
             }
 
+
             //Console.WriteLine();
             //Console.WriteLine("DEBUG");
             //Console.WriteLine("----------------------");
@@ -280,7 +286,26 @@ namespace BadgeSwipeApp
             //Console.WriteLine("Workplace ID = " + reference.workplace_id);
             //Console.WriteLine("Workplace Name = " + reference.workplace_name);
             //Console.WriteLine("Login Status = " + reference.login_status);
-            
+
+        }
+
+        public void adjustAltReference(QC.SqlConnection connection, Refs reference, int version)
+        {
+            using(var command = new QC.SqlCommand())
+            {
+                command.Connection = connection;
+                command.CommandType = DT.CommandType.Text;
+                command.CommandText = @"
+                SELECT alt_order
+                FROM AltRefs
+                WHERE standard_ref = " + reference.reference_number + " AND alt_version = " + version + ";";
+                QC.SqlDataReader reader = command.ExecuteReader();
+                while (reader.Read())
+                {
+                    reference.manufacturing_reference = reader.SafeGetString(0);
+                }
+                reader.Close();
+            }
         }
 
         public void FillWorkplace(QC.SqlConnection connection, Workplaces workplace)
