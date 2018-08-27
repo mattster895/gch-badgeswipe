@@ -6,3 +6,8 @@ C:\Users\mfennell\documents\visual studio 2017\Projects\BadgeSwipeApp\BadgeSwipe
 C:\Users\mfennell\documents\visual studio 2017\Projects\BadgeSwipeApp\BadgeSwipeApp\obj\Release\BadgeSwipeApp.csprojResolveAssemblyReference.cache
 C:\Users\mfennell\documents\visual studio 2017\Projects\BadgeSwipeApp\BadgeSwipeApp\obj\Release\BadgeSwipeApp.exe
 C:\Users\mfennell\documents\visual studio 2017\Projects\BadgeSwipeApp\BadgeSwipeApp\obj\Release\BadgeSwipeApp.pdb
+C:\Users\mfennell\documents\visual studio 2017\Projects\BadgeSwipeApp\BadgeSwipeApp\bin\Release\ExcelDataReader.DataSet.dll
+C:\Users\mfennell\documents\visual studio 2017\Projects\BadgeSwipeApp\BadgeSwipeApp\bin\Release\ExcelDataReader.dll
+C:\Users\mfennell\documents\visual studio 2017\Projects\BadgeSwipeApp\BadgeSwipeApp\bin\Release\TableDependency.SqlClient.Where.dll
+C:\Users\mfennell\documents\visual studio 2017\Projects\BadgeSwipeApp\BadgeSwipeApp\bin\Release\ExcelDataReader.xml
+C:\Users\mfennell\documents\visual studio 2017\Projects\BadgeSwipeApp\BadgeSwipeApp\bin\Release\ExcelDataReader.DataSet.xml
