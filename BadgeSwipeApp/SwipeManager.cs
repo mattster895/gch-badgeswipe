@@ -15,14 +15,27 @@ namespace BadgeSwipeApp
 {
     class SwipeManager
     {
+        static int manageSwitch = 0;
 
         // -----------------------------------------------------------------------------------------------------------------------------------------------------
         // **SETUP**
         // These functions watch for swipes, and manage the steps that should be taken when a swipe happens
         // -----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void SwipeAgent(System.ComponentModel.BackgroundWorker worker, System.ComponentModel.DoWorkEventArgs e)
+        public void SwipeAgent(System.ComponentModel.BackgroundWorker worker, System.ComponentModel.DoWorkEventArgs e, string progSpec)
         {
+            if (progSpec.Equals("411"))
+            {
+                manageSwitch = 1;
+            }
+            if (progSpec.Equals("416"))
+            {
+                manageSwitch = 2;
+            }
+            if (progSpec.Equals("Lasers"))
+            {
+                manageSwitch = 3;
+            }
             SwipeEntry currentSwipe = new SwipeEntry();
             using (var connectionMainDB = new QC.SqlConnection(
             "Server = 192.168.176.133; " +
@@ -39,14 +52,43 @@ namespace BadgeSwipeApp
                 
                     while (!worker.CancellationPending)
                     {
-                        while(GlobalVar.SwipeNum>0)
+                        switch (manageSwitch)
                         {
-                            getEntry(connectionEntryDB, currentSwipe);
-                            currentSwipe.debugPrint(GlobalVar.Debug);
-                            SwipeProcess(connectionMainDB, currentSwipe);
-                            worker.ReportProgress(0);
-                            Thread.Sleep(100);
+                        case 1:
+                            while (GlobalVar.SwipeNum411 > 0)
+                            {
+                                getEntry(connectionEntryDB, currentSwipe, progSpec);
+                                currentSwipe.debugPrint(GlobalVar.Debug);
+                                SwipeProcess(connectionMainDB, currentSwipe);
+                                worker.ReportProgress(0);
+                                Thread.Sleep(100);
+                            }
+                            break;
+                        case 2:
+                            while (GlobalVar.SwipeNum416 > 0)
+                            {
+                                getEntry(connectionEntryDB, currentSwipe, progSpec);
+                                currentSwipe.debugPrint(GlobalVar.Debug);
+                                SwipeProcess(connectionMainDB, currentSwipe);
+                                worker.ReportProgress(0);
+                                Thread.Sleep(100);
+                            }
+                            break;
+                        case 3:
+                            while (GlobalVar.SwipeNumLaser > 0)
+                            {
+                                getEntry(connectionEntryDB, currentSwipe, progSpec);
+                                currentSwipe.debugPrint(GlobalVar.Debug);
+                                SwipeProcess(connectionMainDB, currentSwipe);
+                                worker.ReportProgress(0);
+                                Thread.Sleep(100);
+                            }
+                            break;
+                        default:
+                            break;
                         }
+
+                        
                     }                                    
                     connectionMainDB.Close();
                     connectionEntryDB.Close();
@@ -257,16 +299,16 @@ namespace BadgeSwipeApp
         // These functions are more all-purpose database manipulators
         // -----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void getEntry(QC.SqlConnection connection, SwipeEntry swipe)
+        public void getEntry(QC.SqlConnection connection, SwipeEntry swipe, string progSpec)
         {
             using (var command = new QC.SqlCommand())
             {
                 command.Connection = connection;
                 command.CommandType = DT.CommandType.Text;
                 command.CommandText = @"
-                SELECT sent_workplace, sent_id, timestamp
-                FROM SwipeData
-                WHERE entry_number = " + GlobalVar.StartSwipe + ";";
+                SELECT sent_workplace, sent_id
+                FROM SwipeData" + progSpec + 
+                " WHERE entry_number = " + GlobalVar.StartSwipe + ";";
 
                 QC.SqlDataReader reader = command.ExecuteReader();
 
@@ -274,7 +316,6 @@ namespace BadgeSwipeApp
                 {
                     swipe.sent_workplace = reader.SafeGetInt(0);
                     swipe.sent_id = reader.SafeGetInt(1);
-                    swipe.timestamp = reader.GetDateTime(2);
                 }
                 reader.Close();
         

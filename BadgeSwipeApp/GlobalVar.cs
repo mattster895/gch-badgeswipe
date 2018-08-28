@@ -10,14 +10,19 @@ namespace BadgeSwipeApp
     {
         static int _StartSwipe; 
         static int _SwipeNum; 
+
         static int _StartSwipe411;
         static int _SwipeNum411;
+
         static int _StartSwipe416;
         static int _SwipeNum416;
+
         static int _StartSwipeLaser;
         static int _SwipeNumLaser;
+
         static int _StartRef;
         static int _RefNum;
+
         static bool _Debug;
         static bool _SwipeAgent411;
         static bool _SwipeAgent416;

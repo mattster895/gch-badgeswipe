@@ -240,7 +240,7 @@ namespace BadgeSwipeApp
         {
             BackgroundWorker worker = sender as BackgroundWorker;
             SwipeManager swipeManager411 = new SwipeManager();
-            swipeManager411.SwipeAgent(worker, e);
+            swipeManager411.SwipeAgent(worker, e, "411");
         }
 
         private static void worker2_ProgressChanged(object sender, ProgressChangedEventArgs e)
@@ -328,7 +328,7 @@ namespace BadgeSwipeApp
         {
             BackgroundWorker worker = sender as BackgroundWorker;
             SwipeManager swipeManager416 = new SwipeManager();
-            swipeManager416.SwipeAgent(worker, e);
+            swipeManager416.SwipeAgent(worker, e, "416");
         }
 
         private static void worker6_ProgressChanged(object sender, ProgressChangedEventArgs e)
@@ -372,7 +372,7 @@ namespace BadgeSwipeApp
         {
             BackgroundWorker worker = sender as BackgroundWorker;
             SwipeManager swipeManagerLaser = new SwipeManager();
-            swipeManagerLaser.SwipeAgent(worker, e);
+            swipeManagerLaser.SwipeAgent(worker, e, "Lasers");
         }
 
         private static void worker8_ProgressChanged(object sender, ProgressChangedEventArgs e)
