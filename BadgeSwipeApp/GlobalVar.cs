@@ -8,8 +8,14 @@ namespace BadgeSwipeApp
 {
     public static class GlobalVar
     {
-        static int _StartSwipe;
-        static int _SwipeNum;
+        static int _StartSwipe; 
+        static int _SwipeNum; 
+        static int _StartSwipe411;
+        static int _SwipeNum411;
+        static int _StartSwipe416;
+        static int _SwipeNum416;
+        static int _StartSwipeLaser;
+        static int _SwipeNumLaser;
         static int _StartRef;
         static int _RefNum;
         static bool _Debug;
@@ -40,7 +46,79 @@ namespace BadgeSwipeApp
                 _SwipeNum = value;
             }
         }
-        
+
+        public static int StartSwipe411
+        {
+            get
+            {
+                return _StartSwipe411;
+            }
+            set
+            {
+                _StartSwipe411 = value;
+            }
+        }
+
+        public static int SwipeNum411
+        {
+            get
+            {
+                return _SwipeNum411;
+            }
+            set
+            {
+                _SwipeNum411 = value;
+            }
+        }
+
+        public static int StartSwipe416
+        {
+            get
+            {
+                return _StartSwipe416;
+            }
+            set
+            {
+                _StartSwipe416 = value;
+            }
+        }
+
+        public static int SwipeNum416
+        {
+            get
+            {
+                return _SwipeNum416;
+            }
+            set
+            {
+                _SwipeNum416 = value;
+            }
+        }
+
+        public static int StartSwipeLaser
+        {
+            get
+            {
+                return _StartSwipeLaser;
+            }
+            set
+            {
+                _StartSwipeLaser = value;
+            }
+        }
+
+        public static int SwipeNumLaser
+        {
+            get
+            {
+                return _SwipeNumLaser;
+            }
+            set
+            {
+                _SwipeNumLaser = value;
+            }
+        }
+
         public static int StartRef
         {
             get

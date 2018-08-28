@@ -91,7 +91,11 @@ namespace BadgeSwipeApp
                 Console.WriteLine("-----------------------------------");
                 Console.WriteLine("Debug Mode: " + boolFormatter(GlobalVar.Debug));
                 Console.ResetColor();
-                Console.WriteLine("Badge Swipe Agent: " + boolFormatter(GlobalVar.SwipeAgent));
+                Console.WriteLine("411 Badge Scanners: " + boolFormatter(GlobalVar.SwipeAgent));
+                Console.ResetColor();
+                Console.WriteLine("416 Badge Scanners: " + boolFormatter(GlobalVar.SwipeAgent));
+                Console.ResetColor();
+                Console.WriteLine("Laser Badge Scanners: " + boolFormatter(GlobalVar.SwipeAgent));
                 Console.ResetColor();
                 Console.WriteLine("Ref Scan Agent: " + boolFormatter(GlobalVar.RefAgent));
                 Console.ResetColor();
@@ -100,10 +104,12 @@ namespace BadgeSwipeApp
                 Console.WriteLine("-----------------------------------");
                 Console.WriteLine("0) Run with these settings");
                 Console.WriteLine("1) Change Debug Mode");
-                Console.WriteLine("2) Change Badge Swipe Agent");
-                Console.WriteLine("3) Change Ref Scan Agent");
-                Console.WriteLine("4) Change Send Frames");
-                Console.WriteLine("5) Refresh Laser Workplaces");
+                Console.WriteLine("2) Change 411 Badge Swipe Agent");
+                Console.WriteLine("3) Change 416 Badge Swipe Agent");
+                Console.WriteLine("4) Change Laser Badge Swipe Agent");
+                Console.WriteLine("5) Change Ref Scan Agent");
+                Console.WriteLine("6) Change Send Frames");
+                Console.WriteLine("7) Refresh Laser Workplaces");
                 Console.WriteLine();
                 char selection = Console.ReadKey().KeyChar;
                 Console.WriteLine();
@@ -128,20 +134,34 @@ namespace BadgeSwipeApp
                         Console.Clear();
                         break;
                     case '3':
+                        if (GlobalVar.SwipeAgent)
+                            GlobalVar.SwipeAgent = false;
+                        else
+                            GlobalVar.SwipeAgent = true;
+                        Console.Clear();
+                        break;
+                    case '4':
+                        if (GlobalVar.SwipeAgent)
+                            GlobalVar.SwipeAgent = false;
+                        else
+                            GlobalVar.SwipeAgent = true;
+                        Console.Clear();
+                        break;
+                    case '5':
                         if (GlobalVar.RefAgent)
                             GlobalVar.RefAgent = false;
                         else
                             GlobalVar.RefAgent = true;
                         Console.Clear();
                         break;
-                    case '4':
+                    case '6':
                         if (GlobalVar.SendFrames)
                             GlobalVar.SendFrames = false;
                         else
                             GlobalVar.SendFrames = true;
                         Console.Clear();
                         break;
-                    case '5':
+                    case '7':
                         Console.Clear();
                         RefreshFromFile refresh = new RefreshFromFile();
                         refresh.RefreshLaserWorkplace();
