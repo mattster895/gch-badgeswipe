@@ -210,8 +210,8 @@ namespace BadgeSwipeApp
         {
             // Get the BackgroundWorker that raised this event.
             BackgroundWorker worker = sender as BackgroundWorker;
-            SwipeWatcher swipeWatcher411 = new SwipeWatcher();
-            swipeWatcher411.DependencyWatch(worker, e, "411");   
+            SwipeWatcher411 swipeWatcher411 = new SwipeWatcher411();
+            swipeWatcher411.DependencyWatch(worker, e);   
         }
 
         private static void worker1_ProgressChanged(object sender, ProgressChangedEventArgs e)
@@ -239,8 +239,8 @@ namespace BadgeSwipeApp
         private static void worker2_DoWork(object sender, DoWorkEventArgs e)
         {
             BackgroundWorker worker = sender as BackgroundWorker;
-            SwipeManager swipeManager411 = new SwipeManager();
-            swipeManager411.SwipeAgent(worker, e, "411");
+            SwipeManager411 swipeManager411 = new SwipeManager411();
+            swipeManager411.SwipeAgent(worker, e);
         }
 
         private static void worker2_ProgressChanged(object sender, ProgressChangedEventArgs e)
@@ -298,8 +298,8 @@ namespace BadgeSwipeApp
         {
             // Get the BackgroundWorker that raised this event.
             BackgroundWorker worker = sender as BackgroundWorker;
-            SwipeWatcher swipeWatcher416 = new SwipeWatcher();
-            swipeWatcher416.DependencyWatch(worker, e, "416");
+            SwipeWatcher416 swipeWatcher416 = new SwipeWatcher416();
+            swipeWatcher416.DependencyWatch(worker, e);
         }
 
         private static void worker5_ProgressChanged(object sender, ProgressChangedEventArgs e)
@@ -327,8 +327,8 @@ namespace BadgeSwipeApp
         private static void worker6_DoWork(object sender, DoWorkEventArgs e)
         {
             BackgroundWorker worker = sender as BackgroundWorker;
-            SwipeManager swipeManager416 = new SwipeManager();
-            swipeManager416.SwipeAgent(worker, e, "416");
+            SwipeManager416 swipeManager416 = new SwipeManager416();
+            swipeManager416.SwipeAgent(worker, e);
         }
 
         private static void worker6_ProgressChanged(object sender, ProgressChangedEventArgs e)
@@ -342,8 +342,8 @@ namespace BadgeSwipeApp
         {
             // Get the BackgroundWorker that raised this event.
             BackgroundWorker worker = sender as BackgroundWorker;
-            SwipeWatcher swipeWatcherLaser = new SwipeWatcher();
-            swipeWatcherLaser.DependencyWatch(worker, e, "Lasers");
+            SwipeWatcherLaser swipeWatcherLaser = new SwipeWatcherLaser();
+            swipeWatcherLaser.DependencyWatch(worker, e);
         }
 
         private static void worker7_ProgressChanged(object sender, ProgressChangedEventArgs e)
@@ -371,8 +371,8 @@ namespace BadgeSwipeApp
         private static void worker8_DoWork(object sender, DoWorkEventArgs e)
         {
             BackgroundWorker worker = sender as BackgroundWorker;
-            SwipeManager swipeManagerLaser = new SwipeManager();
-            swipeManagerLaser.SwipeAgent(worker, e, "Lasers");
+            SwipeManagerLaser swipeManagerLaser = new SwipeManagerLaser();
+            swipeManagerLaser.SwipeAgent(worker, e);
         }
 
         private static void worker8_ProgressChanged(object sender, ProgressChangedEventArgs e)

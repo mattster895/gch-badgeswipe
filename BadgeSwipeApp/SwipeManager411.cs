@@ -13,29 +13,15 @@ using System.IO;
 
 namespace BadgeSwipeApp
 {
-    class SwipeManager
+    class SwipeManager411
     {
-        static int manageSwitch = 0;
-
         // -----------------------------------------------------------------------------------------------------------------------------------------------------
         // **SETUP**
         // These functions watch for swipes, and manage the steps that should be taken when a swipe happens
         // -----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void SwipeAgent(System.ComponentModel.BackgroundWorker worker, System.ComponentModel.DoWorkEventArgs e, string progSpec)
+        public void SwipeAgent(System.ComponentModel.BackgroundWorker worker, System.ComponentModel.DoWorkEventArgs e)
         {
-            if (progSpec.Equals("411"))
-            {
-                manageSwitch = 1;
-            }
-            if (progSpec.Equals("416"))
-            {
-                manageSwitch = 2;
-            }
-            if (progSpec.Equals("Lasers"))
-            {
-                manageSwitch = 3;
-            }
             SwipeEntry currentSwipe = new SwipeEntry();
             using (var connectionMainDB = new QC.SqlConnection(
             "Server = 192.168.176.133; " +
@@ -52,43 +38,14 @@ namespace BadgeSwipeApp
                 
                     while (!worker.CancellationPending)
                     {
-                        switch (manageSwitch)
-                        {
-                        case 1:
                             while (GlobalVar.SwipeNum411 > 0)
                             {
-                                getEntry(connectionEntryDB, currentSwipe, progSpec);
+                                getEntry(connectionEntryDB, currentSwipe);
                                 currentSwipe.debugPrint(GlobalVar.Debug);
                                 SwipeProcess(connectionMainDB, currentSwipe);
                                 worker.ReportProgress(0);
                                 Thread.Sleep(100);
                             }
-                            break;
-                        case 2:
-                            while (GlobalVar.SwipeNum416 > 0)
-                            {
-                                getEntry(connectionEntryDB, currentSwipe, progSpec);
-                                currentSwipe.debugPrint(GlobalVar.Debug);
-                                SwipeProcess(connectionMainDB, currentSwipe);
-                                worker.ReportProgress(0);
-                                Thread.Sleep(100);
-                            }
-                            break;
-                        case 3:
-                            while (GlobalVar.SwipeNumLaser > 0)
-                            {
-                                getEntry(connectionEntryDB, currentSwipe, progSpec);
-                                currentSwipe.debugPrint(GlobalVar.Debug);
-                                SwipeProcess(connectionMainDB, currentSwipe);
-                                worker.ReportProgress(0);
-                                Thread.Sleep(100);
-                            }
-                            break;
-                        default:
-                            break;
-                        }
-
-                        
                     }                                    
                     connectionMainDB.Close();
                     connectionEntryDB.Close();
@@ -282,16 +239,16 @@ namespace BadgeSwipeApp
 
         public void write_frame(string frame)
         {
-            try
-            {
-                StreamWriter sw = new StreamWriter("Swipelog.txt", true);
-                sw.WriteLine("("+DateTime.Now.ToString("s")+"):\t" + frame);
-                sw.Close();
-            }
-            catch(Exception e)
-            {
-                Console.WriteLine("Exception: " + e.Message);
-            }
+                try
+                {
+                    StreamWriter sw = new StreamWriter("Swipelog411.txt", true);
+                    sw.WriteLine("(" + DateTime.Now.ToString("s") + "):\t" + frame);
+                    sw.Close();
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("Exception: " + e.Message);
+                }
         }
 
         // -----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -299,7 +256,7 @@ namespace BadgeSwipeApp
         // These functions are more all-purpose database manipulators
         // -----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void getEntry(QC.SqlConnection connection, SwipeEntry swipe, string progSpec)
+        public void getEntry(QC.SqlConnection connection, SwipeEntry swipe)
         {
             using (var command = new QC.SqlCommand())
             {
@@ -307,8 +264,8 @@ namespace BadgeSwipeApp
                 command.CommandType = DT.CommandType.Text;
                 command.CommandText = @"
                 SELECT sent_workplace, sent_id
-                FROM SwipeData" + progSpec + 
-                " WHERE entry_number = " + GlobalVar.StartSwipe + ";";
+                FROM SwipeData411" + 
+                " WHERE entry_number = " + GlobalVar.StartSwipe411 + ";";
 
                 QC.SqlDataReader reader = command.ExecuteReader();
 
@@ -511,9 +468,9 @@ namespace BadgeSwipeApp
                     while (reader.Read())
                     {
                         tempID = reader.SafeGetInt(0);
-                        Console.WriteLine(reader.SafeGetInt(0));
+                        
                         tempName = reader.SafeGetString(1);
-                        Console.WriteLine(reader.SafeGetString(1));
+                        
                     }
                     reader.Close();
                     command.CommandText = @"

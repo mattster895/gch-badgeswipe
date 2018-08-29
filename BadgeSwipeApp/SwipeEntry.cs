@@ -27,10 +27,10 @@ namespace BadgeSwipeApp
                 Console.WriteLine();
                 Console.WriteLine("Debug Print Swipe Entry Details");
                 Console.WriteLine("-----------------------------");
-                Console.WriteLine("Entry Number - " + entry_number);
+               
                 Console.WriteLine("Sent Workplace - " + sent_workplace);
                 Console.WriteLine("Sent ID - " + sent_id);
-                Console.WriteLine("Timestamp - " + timestamp);
+
             }
         }
     }

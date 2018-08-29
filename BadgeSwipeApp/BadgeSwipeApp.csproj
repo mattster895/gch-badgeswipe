@@ -69,8 +69,12 @@
     <Compile Include="RefWatcher.cs" />
     <Compile Include="SQLReaderExtensions.cs" />
     <Compile Include="SwipeEntry.cs" />
-    <Compile Include="SwipeManager.cs" />
-    <Compile Include="SwipeWatcher.cs" />
+    <Compile Include="SwipeManagerLaser.cs" />
+    <Compile Include="SwipeManager416.cs" />
+    <Compile Include="SwipeManager411.cs" />
+    <Compile Include="SwipeWatcherLaser.cs" />
+    <Compile Include="SwipeWatcher416.cs" />
+    <Compile Include="SwipeWatcher411.cs" />
     <Compile Include="Workers.cs" />
     <Compile Include="Workplaces.cs" />
   </ItemGroup>
