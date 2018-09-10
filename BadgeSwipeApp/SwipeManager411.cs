@@ -468,9 +468,7 @@ namespace BadgeSwipeApp
                     while (reader.Read())
                     {
                         tempID = reader.SafeGetInt(0);
-                        
                         tempName = reader.SafeGetString(1);
-                        
                     }
                     reader.Close();
                     command.CommandText = @"

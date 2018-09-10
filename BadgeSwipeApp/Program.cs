@@ -90,6 +90,10 @@ namespace BadgeSwipeApp
             worker2.CancelAsync();
             worker3.CancelAsync();
             worker4.CancelAsync();
+            worker5.CancelAsync();
+            worker6.CancelAsync();
+            worker7.CancelAsync();
+            worker8.CancelAsync();
 
             Console.WriteLine("Press any key to quit");
             Console.ReadKey();
