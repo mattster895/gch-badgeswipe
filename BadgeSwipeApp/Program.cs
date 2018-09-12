@@ -25,6 +25,7 @@ namespace BadgeSwipeApp
             GlobalVar.SwipeNum = 0;
             GlobalVar.StartRef = 0;
             GlobalVar.RefNum = 0;
+
             var worker1 = new BackgroundWorker { WorkerReportsProgress = true, WorkerSupportsCancellation = true };
             var worker2 = new BackgroundWorker { WorkerReportsProgress = true, WorkerSupportsCancellation = true };
             var worker3 = new BackgroundWorker { WorkerReportsProgress = true, WorkerSupportsCancellation = true };
