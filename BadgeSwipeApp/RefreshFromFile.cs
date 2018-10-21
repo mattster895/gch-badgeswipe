@@ -482,12 +482,142 @@ namespace BadgeSwipeApp
 
         public void RefreshWorkplaceWorkers()
         {
-            Console.WriteLine("To Be Implemented");
+            // Declare variables
+            string workerExportPath = "workers.xlsx";
+            int workerHeaderRows = 4;
+            string workplace_name;
+            int worker_id;
+            int workplace_id = 0;
+            DataSet queryExport = new DataSet();
+
+            // Read in Sisteplant's query export
+            queryExport = QueryToDataSet(workerExportPath, workerHeaderRows);
+
+            
+
+            using (var connectionMainDBAdd = new QC.SqlConnection(
+            "Server = 192.168.176.133; " +
+            "Database=Badge_Swipe_MainDB;" +
+            "Trusted_Connection=yes;"))
+            {
+                connectionMainDBAdd.Open();
+                using (var command = new QC.SqlCommand())
+                {
+                    command.Connection = connectionMainDBAdd;
+                    command.CommandType = DT.CommandType.Text;
+                    
+                    // Clear workplaces table
+                    // ------------------------
+                    command.CommandText = @"
+                    UPDATE Workplaces
+                    SET active_operator = 0;";
+                    command.ExecuteNonQuery();
+
+                    // Clear workers table
+                    // ------------------------
+                    command.CommandText = @"
+                    UPDATE Workers
+                    SET workplace_id = 0,
+                    workplace_name = NULL,
+                    login_status = 0;";
+                    command.ExecuteNonQuery();
+
+                }
+                connectionMainDBAdd.Close();
+            }
+
+            
+
+            // 1. For each entry in the query export
+            foreach(DataTable table in queryExport.Tables)
+            {
+                table.Columns.Remove("LOG IN DATE");
+                foreach(DataRow row in table.Rows)
+                {
+                    // 2. Read in the workplace and operator
+                    workplace_name = row["WORKPLACE"].ToString();
+                    Int32.TryParse(row["WORKER"].ToString(),out worker_id);
+                    
+
+                    using (var connectionMainDBAdd = new QC.SqlConnection(
+                    "Server = 192.168.176.133; " +
+                    "Database=Badge_Swipe_MainDB;" +
+                    "Trusted_Connection=yes;"))
+                    {
+                        connectionMainDBAdd.Open();
+                        using (var command = new QC.SqlCommand())
+                        {
+                            command.Connection = connectionMainDBAdd;
+                            command.CommandType = DT.CommandType.Text;
+
+                            // 3. Set active_operator to listed where workplace is LIKE the one saved in Workplaces
+                            command.CommandText = @"
+                            UPDATE Workplaces
+                            SET active_operator = " + worker_id + " WHERE workplace_name = '" + workplace_name + "';";
+                            command.ExecuteNonQuery();
+
+                            // 4. Save the corresponding workplace_id
+                            QC.SqlDataReader reader;
+                            command.CommandText = @"SELECT workplace_id FROM Workplaces WHERE workplace_name = '" + workplace_name + "';";
+                            reader = command.ExecuteReader();
+                            while (reader.Read())
+                            {
+                                workplace_id = reader.SafeGetInt(0);
+                            }
+                            
+                            reader.Close();
+
+                            // 5 Check Workers to see if worker exists.
+                            command.CommandText = @"SELECT * FROM Workers WHERE worker_id = " + worker_id + ";";
+                            reader = command.ExecuteReader();
+
+                            // 6A If not, add them
+                            if (!reader.HasRows)
+                            {
+                                reader.Close();
+                                command.CommandText = @"INSERT INTO Workers(worker_id, worker_clearance, login_status) VALUES(" + worker_id + ",1,0);";
+                                // SEND EMAIL TO HR
+                                EmailAgent emailAgent = new EmailAgent();
+                                emailAgent.MissingBadgeEmail(worker_id);
+                                command.ExecuteNonQuery();
+                            }
+
+                            if (!reader.IsClosed) { reader.Close(); }
+                                
+
+                            // 6B Update Workers, for operator, set login to 1, set workplace_id to saved, set workplace_name to saved
+                            command.CommandText = @"UPDATE Workers
+                            SET workplace_id = " + workplace_id +
+                            ", workplace_name = '" + workplace_name +
+                            "', login_status = 1 WHERE worker_id = " + worker_id + ";";
+                            command.ExecuteNonQuery();
+
+                        }
+                        connectionMainDBAdd.Close();
+                    }
+                }
+            }
         }
 
         public void RefreshReferenceDetails()
         {
             Console.WriteLine("To Be Implemented");
+        }
+
+        public void DatasetPrint(DataSet printMe)
+        {
+            // Print
+            foreach (DataTable table in printMe.Tables)
+            {
+                foreach (DataRow row in table.Rows)
+                {
+                    foreach (DataColumn column in table.Columns)
+                    {
+                        Console.Write(row[column] + "  ");
+                    }
+                    Console.WriteLine();
+                }
+            }
         }
 
     }

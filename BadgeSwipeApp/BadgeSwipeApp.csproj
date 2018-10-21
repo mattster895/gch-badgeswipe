@@ -59,6 +59,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AltRefs.cs" />
+    <Compile Include="EmailAgent.cs" />
     <Compile Include="GlobalVar.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

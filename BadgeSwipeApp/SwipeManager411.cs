@@ -341,6 +341,10 @@ namespace BadgeSwipeApp
                 command.ExecuteNonQuery();
             }
 
+            EmailAgent emailAgent = new EmailAgent();
+            emailAgent.MissingBadgeEmail(worker.worker_id);
+
+            // SEND EMAIL TO HR
             // Alert me, because this honestly should only be called in error
 
         }

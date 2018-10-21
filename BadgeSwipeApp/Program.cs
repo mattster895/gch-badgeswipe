@@ -145,6 +145,7 @@ namespace BadgeSwipeApp
                 Console.WriteLine("5) Change Ref Scan Agent");
                 Console.WriteLine("6) Change Send Frames");
                 Console.WriteLine("7) Refresh Laser Workplaces");
+                Console.WriteLine("8) Refresh Workplace Badge Status");
                 Console.WriteLine();
                 char selection = Console.ReadKey().KeyChar;
                 Console.WriteLine();
@@ -198,9 +199,18 @@ namespace BadgeSwipeApp
                         break;
                     case '7':
                         Console.Clear();
-                        RefreshFromFile refresh = new RefreshFromFile();
-                        refresh.RefreshLaserWorkplace();
+                        RefreshFromFile refreshLaser = new RefreshFromFile();
+                        refreshLaser.RefreshLaserWorkplace();
                         Console.WriteLine("Laser Workplaces refreshed.");
+                        break;
+                    case '8':
+                        Console.Clear();
+                        Console.WriteLine("Please place the latest export from Captor's 'Worker' query in the working directory as workers.xlsx...");
+                        Console.ReadKey();
+                        Console.Clear();
+                        RefreshFromFile refreshWorkers = new RefreshFromFile();
+                        refreshWorkers.RefreshWorkplaceWorkers();
+                        Console.WriteLine("Workplace Badge Status refreshed.");
                         break;
                     default:
                         Console.Clear();
